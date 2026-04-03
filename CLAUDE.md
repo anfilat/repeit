@@ -9,8 +9,18 @@ npm run dev          # Start Vite dev server
 npm run build        # TypeScript check + Vite production build
 npm test             # Run tests once (Vitest)
 npm run test:watch   # Run tests in watch mode
+npm run lint         # Run oxlint (check only)
+npm run lint:fix     # Auto-fix oxlint issues
+npm run format       # Format code with oxfmt --write
+npm run format:check # Check formatting without modifying
 npx vitest run src/audio/__tests__/AudioEngine.test.ts  # Run a single test file
 ```
+
+## Code Quality
+
+**Tools:** oxlint (linter), oxfmt (formatter).
+
+**Workflow:** Pre-commit hook runs `lint + format:check + test` (check-only, no modifications). Fix manually with `lint:fix` and `format` commands before committing.
 
 ## Architecture
 

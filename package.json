@@ -8,7 +8,15 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --write src/",
+    "format:check": "oxfmt --check src/",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run lint && npm run format:check && npm test"
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -27,6 +35,9 @@
     "@vitejs/plugin-react": "^4.7.0",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.0.1",
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.58.0",
+    "simple-git-hooks": "^2.13.1",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2",
     "vite": "^7.3.1",

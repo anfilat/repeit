@@ -50,10 +50,7 @@ function playlistReducer(state: PlaylistState, action: Action): PlaylistState {
     case 'SET_CURRENT_INDEX': {
       return {
         ...state,
-        currentIndex: Math.max(
-          0,
-          Math.min(action.index, state.tracks.length - 1),
-        ),
+        currentIndex: Math.max(0, Math.min(action.index, state.tracks.length - 1)),
       };
     }
 
@@ -80,10 +77,8 @@ function playlistReducer(state: PlaylistState, action: Action): PlaylistState {
     }
 
     case 'REMOVE_TRACK': {
-      const tracks = state.tracks.filter((t) => t.id !== action.trackId);
-      const removedIndex = state.tracks.findIndex(
-        (t) => t.id === action.trackId,
-      );
+      const tracks = state.tracks.filter(t => t.id !== action.trackId);
+      const removedIndex = state.tracks.findIndex(t => t.id === action.trackId);
       let ci = state.currentIndex;
 
       if (tracks.length === 0) {
@@ -125,10 +120,7 @@ function getPrevIndex(state: PlaylistState): number {
 
 export function useAudioPlayer() {
   // -- Playlist state via useReducer ------------------------------------------
-  const [playlist, dispatch] = useReducer(
-    playlistReducer,
-    initialPlaylistState,
-  );
+  const [playlist, dispatch] = useReducer(playlistReducer, initialPlaylistState);
 
   // Mutable ref to latest playlist so callbacks always see fresh state
   const playlistRef = useRef(playlist);
@@ -214,9 +206,7 @@ export function useAudioPlayer() {
 
   const currentTrack: Track | undefined = useMemo(() => {
     const { currentIndex, tracks } = playlist;
-    return currentIndex >= 0 && currentIndex < tracks.length
-      ? tracks[currentIndex]
-      : undefined;
+    return currentIndex >= 0 && currentIndex < tracks.length ? tracks[currentIndex] : undefined;
   }, [playlist]);
 
   // ---------------------------------------------------------------------------
@@ -261,19 +251,15 @@ export function useAudioPlayer() {
   // -- File handling -----------------------------------------------------------
 
   const addFiles = useCallback(async (handles: FileSystemFileHandle[]) => {
-    const audioHandles =
-      fileServiceRef.current.filterAudioFiles(handles);
+    const audioHandles = fileServiceRef.current.filterAudioFiles(handles);
     if (audioHandles.length === 0) return;
 
     const ctx = new AudioContext();
     const newTracks: Track[] = await Promise.all(
-      audioHandles.map(async (handle) => {
+      audioHandles.map(async handle => {
         let duration = 0;
         try {
-          const buffer = await fileServiceRef.current.decodeAudioFile(
-            handle,
-            ctx,
-          );
+          const buffer = await fileServiceRef.current.decodeAudioFile(handle, ctx);
           duration = buffer.duration;
         } catch {
           // skip duration when decode fails
@@ -284,7 +270,7 @@ export function useAudioPlayer() {
           duration,
           handle,
         };
-      }),
+      })
     );
     ctx.close();
 
@@ -293,24 +279,22 @@ export function useAudioPlayer() {
 
   const addFolder = useCallback(
     async (dirHandle: FileSystemDirectoryHandle) => {
-      const handles =
-        await fileServiceRef.current.scanDirectory(dirHandle);
+      const handles = await fileServiceRef.current.scanDirectory(dirHandle);
       await addFiles(handles);
     },
-    [addFiles],
+    [addFiles]
   );
 
   // -- Storage -----------------------------------------------------------------
 
   const savePlaylist = useCallback(async (playlistId: string) => {
-    const handles = playlistRef.current.tracks.map((t) => t.handle);
+    const handles = playlistRef.current.tracks.map(t => t.handle);
     await storageServiceRef.current.saveHandles(playlistId, handles);
   }, []);
 
   const loadPlaylist = useCallback(
     async (playlistId: string) => {
-      const handles =
-        await storageServiceRef.current.loadHandles(playlistId);
+      const handles = await storageServiceRef.current.loadHandles(playlistId);
       if (handles.length === 0) return;
 
       const granted: FileSystemFileHandle[] = [];
@@ -322,7 +306,7 @@ export function useAudioPlayer() {
         await addFiles(granted);
       }
     },
-    [addFiles],
+    [addFiles]
   );
 
   // ---------------------------------------------------------------------------
@@ -335,7 +319,7 @@ export function useAudioPlayer() {
       await engine.loadBuffer(buffer);
       syncState();
     },
-    [getEngine, syncState],
+    [getEngine, syncState]
   );
 
   const play = useCallback(() => {
@@ -358,7 +342,7 @@ export function useAudioPlayer() {
       engine.seek(time);
       syncState();
     },
-    [getEngine, syncState],
+    [getEngine, syncState]
   );
 
   const stop = useCallback(() => {
@@ -374,7 +358,7 @@ export function useAudioPlayer() {
       engine.setVolume(value);
       syncState();
     },
-    [getEngine, syncState],
+    [getEngine, syncState]
   );
 
   const setOnTrackEnd = useCallback((cb: (() => void) | null) => {

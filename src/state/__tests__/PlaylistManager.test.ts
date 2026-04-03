@@ -52,7 +52,8 @@ describe('PlaylistManager', () => {
   it('next beyond last with repeat off returns null', () => {
     const pm = new PlaylistManager();
     pm.setTracks(tracks);
-    pm.next(); pm.next();
+    pm.next();
+    pm.next();
     expect(pm.next()).toBeNull();
     expect(pm.state.currentIndex).toBe(2);
   });
@@ -61,7 +62,8 @@ describe('PlaylistManager', () => {
     const pm = new PlaylistManager();
     pm.setTracks(tracks);
     pm.setRepeat('all');
-    pm.next(); pm.next();
+    pm.next();
+    pm.next();
     const result = pm.next();
     expect(result).toEqual(tracks[0]);
     expect(pm.state.currentIndex).toBe(0);

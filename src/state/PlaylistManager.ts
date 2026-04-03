@@ -13,7 +13,9 @@ export class PlaylistManager {
     this.state.currentIndex = tracks.length > 0 ? 0 : -1;
   }
 
-  setRepeat(mode: RepeatMode): void { this.state.repeat = mode; }
+  setRepeat(mode: RepeatMode): void {
+    this.state.repeat = mode;
+  }
 
   setCurrentIndex(index: number): void {
     this.state.currentIndex = Math.max(0, Math.min(index, this.state.tracks.length - 1));
@@ -25,7 +27,10 @@ export class PlaylistManager {
     if (repeat === 'one') return tracks[currentIndex] ?? null;
     const nextIndex = currentIndex + 1;
     if (nextIndex >= tracks.length) {
-      if (repeat === 'all') { this.state.currentIndex = 0; return tracks[0]; }
+      if (repeat === 'all') {
+        this.state.currentIndex = 0;
+        return tracks[0];
+      }
       return null;
     }
     this.state.currentIndex = nextIndex;

@@ -4,7 +4,8 @@ import { FileService } from '../FileService';
 function createMockFileHandle(name: string): FileSystemFileHandle {
   const file = new File([], name, { type: 'audio/mpeg' });
   return {
-    kind: 'file', name,
+    kind: 'file',
+    name,
     getFile: vi.fn().mockResolvedValue(file),
     isSameEntry: vi.fn(),
     queryPermission: vi.fn().mockResolvedValue('granted'),
@@ -16,13 +17,16 @@ function createMockDirectoryHandle(files: Map<string, FileSystemFileHandle>): Fi
   const entries = Array.from(files.entries());
   let index = 0;
   return {
-    kind: 'directory', name: 'test-folder',
+    kind: 'directory',
+    name: 'test-folder',
     values: vi.fn().mockReturnValue({
       next: () => {
         if (index < entries.length) return Promise.resolve({ value: entries[index++][1], done: false });
         return Promise.resolve({ value: undefined, done: true });
       },
-      [Symbol.asyncIterator]() { return this; },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
     }),
   } as unknown as FileSystemDirectoryHandle;
 }
@@ -48,7 +52,13 @@ describe('FileService', () => {
     const mp3 = createMockFileHandle('track1.mp3');
     const wav = createMockFileHandle('track2.wav');
     const txt = createMockFileHandle('notes.txt');
-    const dirHandle = createMockDirectoryHandle(new Map([['track1.mp3', mp3], ['track2.wav', wav], ['notes.txt', txt]]));
+    const dirHandle = createMockDirectoryHandle(
+      new Map([
+        ['track1.mp3', mp3],
+        ['track2.wav', wav],
+        ['notes.txt', txt],
+      ])
+    );
     const result = await fileService.scanDirectory(dirHandle);
     expect(result).toHaveLength(2);
     expect(result.map(h => h.name)).toContain('track1.mp3');

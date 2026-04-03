@@ -22,7 +22,10 @@ export class StorageService {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         }
       };
-      request.onsuccess = () => { this.db = request.result; resolve(this.db); };
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(this.db);
+      };
       request.onerror = () => reject(request.error);
     });
   }

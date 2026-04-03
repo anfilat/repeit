@@ -48,16 +48,19 @@ export function useAudioEngine() {
     return engineRef.current;
   }, []);
 
-  const loadBuffer = useCallback(async (buffer: AudioBuffer) => {
-    const engine = ensureEngine();
-    await engine.loadBuffer(buffer);
-    setAudioState({
-      isPlaying: false,
-      currentTime: 0,
-      duration: engine.duration,
-      volume: engine.volume,
-    });
-  }, [ensureEngine]);
+  const loadBuffer = useCallback(
+    async (buffer: AudioBuffer) => {
+      const engine = ensureEngine();
+      await engine.loadBuffer(buffer);
+      setAudioState({
+        isPlaying: false,
+        currentTime: 0,
+        duration: engine.duration,
+        volume: engine.volume,
+      });
+    },
+    [ensureEngine]
+  );
 
   const play = useCallback(() => {
     const engine = ensureEngine();
@@ -96,10 +99,13 @@ export function useAudioEngine() {
     }
   }, [stopTicking]);
 
-  const setVolume = useCallback((value: number) => {
-    const engine = ensureEngine();
-    engine.setVolume(value);
-  }, [ensureEngine]);
+  const setVolume = useCallback(
+    (value: number) => {
+      const engine = ensureEngine();
+      engine.setVolume(value);
+    },
+    [ensureEngine]
+  );
 
   const setOnTrackEnd = useCallback((callback: (() => void) | null) => {
     if (engineRef.current) {

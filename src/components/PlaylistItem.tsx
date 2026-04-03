@@ -16,14 +16,7 @@ function formatDuration(seconds: number): string {
 }
 
 export function PlaylistItem({ track, isActive, onSelect, onRemove }: PlaylistItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: track.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: track.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -55,7 +48,10 @@ export function PlaylistItem({ track, isActive, onSelect, onRemove }: PlaylistIt
       <span className="flex-1 truncate text-sm">{track.name}</span>
       <span className="text-xs text-gray-400">{formatDuration(track.duration)}</span>
       <button
-        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+        onClick={e => {
+          e.stopPropagation();
+          onRemove();
+        }}
         className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">

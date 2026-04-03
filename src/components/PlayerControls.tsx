@@ -35,7 +35,9 @@ export function PlayerControls({ isPlaying, repeat, onPlayPause, onNext, onPrev,
             <path d="M3 11V9a4 4 0 0 1 4-4h14" />
             <polyline points="7 23 3 19 7 15" />
             <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-            <text x="10" y="15" fontSize="7" fill="currentColor" stroke="none" textAnchor="middle">1</text>
+            <text x="10" y="15" fontSize="7" fill="currentColor" stroke="none" textAnchor="middle">
+              1
+            </text>
           </svg>
         ) : (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -47,11 +49,7 @@ export function PlayerControls({ isPlaying, repeat, onPlayPause, onNext, onPrev,
         )}
       </button>
 
-      <button
-        onClick={onPrev}
-        className="p-2 rounded hover:bg-white/10 transition-colors text-white"
-        title="Previous"
-      >
+      <button onClick={onPrev} className="p-2 rounded hover:bg-white/10 transition-colors text-white" title="Previous">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <rect x="3" y="5" width="3" height="14" />
           <polygon points="21 5 10 12 21 19" />
@@ -75,11 +73,7 @@ export function PlayerControls({ isPlaying, repeat, onPlayPause, onNext, onPrev,
         )}
       </button>
 
-      <button
-        onClick={onNext}
-        className="p-2 rounded hover:bg-white/10 transition-colors text-white"
-        title="Next"
-      >
+      <button onClick={onNext} className="p-2 rounded hover:bg-white/10 transition-colors text-white" title="Next">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <rect x="18" y="5" width="3" height="14" />
           <polygon points="3 5 14 12 3 19" />

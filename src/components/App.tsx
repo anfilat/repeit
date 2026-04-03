@@ -18,23 +18,26 @@ export function App() {
   const loadingRef = useRef(false);
 
   // Load a track into the audio engine
-  const loadAndPlay = useCallback(async (track: Track, autoPlay = false) => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    try {
-      const ctx = new AudioContext();
-      const buffer = await fileService.decodeAudioFile(track.handle, ctx);
-      ctx.close();
-      await audio.loadBuffer(buffer);
-      if (autoPlay) {
-        audio.play();
+  const loadAndPlay = useCallback(
+    async (track: Track, autoPlay = false) => {
+      if (loadingRef.current) return;
+      loadingRef.current = true;
+      try {
+        const ctx = new AudioContext();
+        const buffer = await fileService.decodeAudioFile(track.handle, ctx);
+        ctx.close();
+        await audio.loadBuffer(buffer);
+        if (autoPlay) {
+          audio.play();
+        }
+      } catch (err) {
+        console.error('Failed to load track:', track.name, err);
+      } finally {
+        loadingRef.current = false;
       }
-    } catch (err) {
-      console.error('Failed to load track:', track.name, err);
-    } finally {
-      loadingRef.current = false;
-    }
-  }, [audio]);
+    },
+    [audio]
+  );
 
   // Handle track end: advance to next track
   const handleTrackEnd = useCallback(() => {
@@ -52,10 +55,7 @@ export function App() {
   // When current track changes (from playlist navigation), load it
   const prevIndexRef = useRef(playlist.state.currentIndex);
   useEffect(() => {
-    if (
-      playlist.state.currentIndex !== prevIndexRef.current &&
-      playlist.currentTrack
-    ) {
+    if (playlist.state.currentIndex !== prevIndexRef.current && playlist.currentTrack) {
       prevIndexRef.current = playlist.state.currentIndex;
       loadAndPlay(playlist.currentTrack);
     }
@@ -108,33 +108,48 @@ export function App() {
     playlist.setRepeat(order[(current + 1) % order.length]);
   }, [playlist]);
 
-  const handleSelectTrack = useCallback((index: number) => {
-    playlist.setCurrentIndex(index);
-    const track = playlist.state.tracks[index];
-    if (track) {
-      loadAndPlay(track);
-    }
-  }, [playlist, loadAndPlay]);
+  const handleSelectTrack = useCallback(
+    (index: number) => {
+      playlist.setCurrentIndex(index);
+      const track = playlist.state.tracks[index];
+      if (track) {
+        loadAndPlay(track);
+      }
+    },
+    [playlist, loadAndPlay]
+  );
 
-  const handleAddFiles = useCallback((handles: FileSystemFileHandle[]) => {
-    playlist.addFiles(handles);
-  }, [playlist]);
+  const handleAddFiles = useCallback(
+    (handles: FileSystemFileHandle[]) => {
+      playlist.addFiles(handles);
+    },
+    [playlist]
+  );
 
-  const handleAddFolder = useCallback((dirHandle: FileSystemDirectoryHandle) => {
-    playlist.addFolder(dirHandle);
-  }, [playlist]);
+  const handleAddFolder = useCallback(
+    (dirHandle: FileSystemDirectoryHandle) => {
+      playlist.addFolder(dirHandle);
+    },
+    [playlist]
+  );
 
-  const handleRemoveTrack = useCallback((trackId: string) => {
-    const wasPlaying = playlist.state.tracks[playlist.state.currentIndex]?.id === trackId;
-    playlist.removeTrack(trackId);
-    if (wasPlaying) {
-      audio.stop();
-    }
-  }, [playlist, audio]);
+  const handleRemoveTrack = useCallback(
+    (trackId: string) => {
+      const wasPlaying = playlist.state.tracks[playlist.state.currentIndex]?.id === trackId;
+      playlist.removeTrack(trackId);
+      if (wasPlaying) {
+        audio.stop();
+      }
+    },
+    [playlist, audio]
+  );
 
-  const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
-    playlist.reorder(fromIndex, toIndex);
-  }, [playlist]);
+  const handleReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      playlist.reorder(fromIndex, toIndex);
+    },
+    [playlist]
+  );
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -161,10 +176,7 @@ export function App() {
           onSeek={audio.seek}
         />
         <div className="flex items-center justify-between">
-          <VolumeControl
-            volume={audio.audioState.volume}
-            onVolumeChange={audio.setVolume}
-          />
+          <VolumeControl volume={audio.audioState.volume} onVolumeChange={audio.setVolume} />
           <PlayerControls
             isPlaying={audio.audioState.isPlaying}
             repeat={playlist.state.repeat}
