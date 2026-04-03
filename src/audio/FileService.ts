@@ -6,7 +6,7 @@ export class FileService {
   }
 
   async requestPermission(handle: FileSystemFileHandle): Promise<boolean> {
-    const opts = { mode: 'read' } as PermissionDescriptor;
+    const opts = { mode: 'read' };
     if ((handle as any).queryPermission) {
       const perm = await (handle as any).queryPermission(opts);
       if (perm === 'granted') return true;

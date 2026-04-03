@@ -1,18 +1,18 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { usePlaylist } from './hooks/usePlaylist';
-import { useAudioEngine } from './hooks/useAudioEngine';
-import { FilePicker } from './components/FilePicker';
-import { Playlist } from './components/Playlist';
-import { PlayerControls } from './components/PlayerControls';
-import { ProgressBar } from './components/ProgressBar';
-import { VolumeControl } from './components/VolumeControl';
-import { FileService } from './audio/FileService';
-import type { Track, RepeatMode } from './types';
+import { usePlaylist } from '../hooks/usePlaylist';
+import { useAudioEngine } from '../hooks/useAudioEngine';
+import { FilePicker } from './FilePicker';
+import { Playlist } from './Playlist';
+import { PlayerControls } from './PlayerControls';
+import { ProgressBar } from './ProgressBar';
+import { VolumeControl } from './VolumeControl';
+import { FileService } from '../audio/FileService';
+import type { Track, RepeatMode } from '../types';
 
 const STORAGE_KEY = 'default-playlist';
 const fileService = new FileService();
 
-function App() {
+export function App() {
   const playlist = usePlaylist();
   const audio = useAudioEngine();
   const loadingRef = useRef(false);
@@ -179,5 +179,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

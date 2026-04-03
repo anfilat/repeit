@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PlaylistManager } from '../PlaylistManager';
-import { Track } from '../../types';
+import type { Track } from '../../types';
 
 function createTrack(id: string): Track {
   return { id, name: `${id}.mp3`, duration: 180, handle: { kind: 'file', name: `${id}.mp3` } as FileSystemFileHandle };

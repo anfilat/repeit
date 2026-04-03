@@ -1,4 +1,4 @@
-import { Track, RepeatMode, PlaylistState } from '../types';
+import type { Track, RepeatMode, PlaylistState } from '../types';
 
 export class PlaylistManager {
   public state: PlaylistState = { tracks: [], currentIndex: -1, repeat: 'off' };
