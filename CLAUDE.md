@@ -44,4 +44,4 @@ Audio player PWA using Web Audio API + File System Access API. Chrome/Edge only.
 
 ## Testing
 
-Vitest with `fake-indexeddb` for IndexedDB tests. AudioContext is mocked via `src/audio/__tests__/helpers/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression. Service tests use Node environment (not jsdom).
+Vitest with `happy-dom` environment and `fake-indexeddb` for IndexedDB tests. AudioContext is mocked via `src/audio/__tests__/helpers/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression.
