@@ -5,6 +5,11 @@ export class FileService {
     return handles.filter(h => AUDIO_EXTENSIONS.some(ext => h.name.toLowerCase().endsWith(ext)));
   }
 
+  async checkPermission(handle: FileSystemFileHandle): Promise<boolean> {
+    const perm = await (handle as any).queryPermission({ mode: 'read' });
+    return perm === 'granted';
+  }
+
   async requestPermission(handle: FileSystemFileHandle): Promise<boolean> {
     const opts = { mode: 'read' };
     if ((handle as any).queryPermission) {

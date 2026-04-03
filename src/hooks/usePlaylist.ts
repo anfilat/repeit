@@ -104,6 +104,9 @@ export function usePlaylist() {
   );
 
   const currentTrack = managerRef.current.currentTrack;
+  const pendingHandlesRef = useRef<FileSystemFileHandle[]>([]);
+  const [pendingHandlesCount, setPendingHandlesCount] = useState(0);
+  const loadedRef = useRef(false);
 
   const savePlaylist = useCallback(async (playlistId: string) => {
     const handles = managerRef.current.state.tracks.map(t => t.handle);
@@ -112,9 +115,34 @@ export function usePlaylist() {
 
   const loadPlaylist = useCallback(
     async (playlistId: string) => {
+      if (loadedRef.current) return;
+      loadedRef.current = true;
+
       const handles = await storageServiceRef.current.loadHandles(playlistId);
       if (handles.length === 0) return;
-      // Re-request permissions and filter to those granted
+
+      const granted: FileSystemFileHandle[] = [];
+      const pending: FileSystemFileHandle[] = [];
+      for (const handle of handles) {
+        const ok = await fileServiceRef.current.checkPermission(handle);
+        if (ok) granted.push(handle);
+        else pending.push(handle);
+      }
+      if (granted.length > 0) {
+        await addFiles(granted);
+      }
+      if (pending.length > 0) {
+        pendingHandlesRef.current = pending;
+        setPendingHandlesCount(pending.length);
+      }
+    },
+    [addFiles]
+  );
+
+  const restorePlaylist = useCallback(
+    async (playlistId: string) => {
+      const handles = pendingHandlesRef.current;
+      if (handles.length === 0) return;
       const granted: FileSystemFileHandle[] = [];
       for (const handle of handles) {
         const ok = await fileServiceRef.current.requestPermission(handle);
@@ -123,6 +151,11 @@ export function usePlaylist() {
       if (granted.length > 0) {
         await addFiles(granted);
       }
+      pendingHandlesRef.current = [];
+      setPendingHandlesCount(0);
+      // Re-save with all now-granted handles
+      const allHandles = managerRef.current.state.tracks.map(t => t.handle);
+      await storageServiceRef.current.saveHandles(playlistId, allHandles);
     },
     [addFiles]
   );
@@ -140,5 +173,7 @@ export function usePlaylist() {
     setRepeat,
     savePlaylist,
     loadPlaylist,
+    restorePlaylist,
+    pendingHandlesCount,
   };
 }

@@ -63,9 +63,7 @@ export function App() {
 
   // Save playlist handles when tracks change
   useEffect(() => {
-    if (playlist.state.tracks.length > 0) {
-      playlist.savePlaylist(STORAGE_KEY);
-    }
+    playlist.savePlaylist(STORAGE_KEY);
   }, [playlist.state.tracks, playlist]);
 
   // Load persisted playlist on mount
@@ -144,6 +142,10 @@ export function App() {
     [playlist, audio]
   );
 
+  const handleRestore = useCallback(() => {
+    playlist.restorePlaylist(STORAGE_KEY);
+  }, [playlist]);
+
   const handleReorder = useCallback(
     (fromIndex: number, toIndex: number) => {
       playlist.reorder(fromIndex, toIndex);
@@ -158,6 +160,19 @@ export function App() {
         <h1 className="text-lg font-bold tracking-wide">Repeit</h1>
         <FilePicker onFiles={handleAddFiles} onFolder={handleAddFolder} />
       </header>
+
+      {/* Restore access banner */}
+      {playlist.pendingHandlesCount > 0 && (
+        <div className="px-4 py-2 bg-yellow-900/50 border-b border-yellow-700/50 flex items-center justify-between">
+          <span className="text-yellow-200 text-sm">{playlist.pendingHandlesCount} file(s) need access permission</span>
+          <button
+            onClick={handleRestore}
+            className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-sm font-medium transition-colors"
+          >
+            Restore access
+          </button>
+        </div>
+      )}
 
       {/* Playlist */}
       <Playlist
