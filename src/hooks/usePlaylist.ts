@@ -20,9 +20,13 @@ export function usePlaylist() {
       const audioHandles = fileServiceRef.current.filterAudioFiles(handles);
       if (audioHandles.length === 0) return;
 
+      const existingNames = new Set(managerRef.current.state.tracks.map(t => t.handle.name));
+      const uniqueHandles = audioHandles.filter(h => !existingNames.has(h.name));
+      if (uniqueHandles.length === 0) return;
+
       const ctx = new AudioContext();
       const newTracks: Track[] = await Promise.all(
-        audioHandles.map(async handle => {
+        uniqueHandles.map(async handle => {
           let duration = 0;
           try {
             const buffer = await fileServiceRef.current.decodeAudioFile(handle, ctx);
