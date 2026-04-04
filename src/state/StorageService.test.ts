@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StorageService } from '../StorageService';
+import { StorageService } from './StorageService';
 
 describe('StorageService', () => {
   let service: StorageService;

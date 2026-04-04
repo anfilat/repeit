@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { FileService } from '../FileService';
+import { FileService } from './FileService';
 
 function createMockFileHandle(name: string): FileSystemFileHandle {
   const file = new File([], name, { type: 'audio/mpeg' });

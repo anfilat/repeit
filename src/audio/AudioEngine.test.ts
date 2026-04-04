@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AudioEngine } from '../AudioEngine';
-import { createMockAudioContext } from './helpers/audioContextMock';
+import { AudioEngine } from './AudioEngine';
+import { createMockAudioContext } from './audioContextMock';
 
 describe('AudioEngine', () => {
   let engine: AudioEngine;

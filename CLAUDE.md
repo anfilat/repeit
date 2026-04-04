@@ -13,7 +13,7 @@ npm run lint         # Run oxlint (check only)
 npm run lint:fix     # Auto-fix oxlint issues
 npm run format       # Format code with oxfmt --write
 npm run format:check # Check formatting without modifying
-npx vitest run src/audio/__tests__/AudioEngine.test.ts  # Run a single test file
+npx vitest run src/audio/AudioEngine.test.ts  # Run a single test file
 ```
 
 ## Code Quality
@@ -44,4 +44,4 @@ Audio player PWA using Web Audio API + File System Access API. Chrome/Edge only.
 
 ## Testing
 
-Vitest with `happy-dom` environment and `fake-indexeddb` for IndexedDB tests. AudioContext is mocked via `src/audio/__tests__/helpers/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression.
+Vitest with `happy-dom` environment and `fake-indexeddb` for IndexedDB tests. AudioContext is mocked via `src/audio/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression.
