@@ -153,7 +153,7 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-dvh bg-gray-900 text-white">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <h1 className="text-lg font-bold tracking-wide">Repeit</h1>
