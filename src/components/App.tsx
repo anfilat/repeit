@@ -16,6 +16,7 @@ export function App() {
   const playlist = usePlaylist();
   const audio = useAudioEngine();
   const loadingRef = useRef(false);
+  const initialMountRef = useRef(true);
 
   // Load a track into the audio engine
   const loadAndPlay = useCallback(
@@ -61,8 +62,13 @@ export function App() {
     }
   }, [playlist.state.currentIndex, playlist.currentTrack, loadAndPlay]);
 
-  // Save playlist handles when tracks change
+  // Save playlist handles when tracks change (skip initial mount to avoid
+  // overwriting persisted data before loadPlaylist runs)
   useEffect(() => {
+    if (initialMountRef.current) {
+      initialMountRef.current = false;
+      return;
+    }
     playlist.savePlaylist(STORAGE_KEY);
   }, [playlist.state.tracks, playlist]);
 
