@@ -277,14 +277,6 @@ export function useAudioPlayer() {
     dispatch({ type: 'ADD_TRACKS', tracks: newTracks });
   }, []);
 
-  const addFolder = useCallback(
-    async (dirHandle: FileSystemDirectoryHandle) => {
-      const handles = await fileServiceRef.current.scanDirectory(dirHandle);
-      await addFiles(handles);
-    },
-    [addFiles]
-  );
-
   // -- Storage -----------------------------------------------------------------
 
   const savePlaylist = useCallback(async (playlistId: string) => {
@@ -383,7 +375,6 @@ export function useAudioPlayer() {
     next,
     prev,
     addFiles,
-    addFolder,
     savePlaylist,
     loadPlaylist,
 

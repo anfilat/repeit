@@ -130,13 +130,6 @@ export function App() {
     [playlist]
   );
 
-  const handleAddFolder = useCallback(
-    (dirHandle: FileSystemDirectoryHandle) => {
-      playlist.addFolder(dirHandle);
-    },
-    [playlist]
-  );
-
   const handleRemoveTrack = useCallback(
     (trackId: string) => {
       const wasPlaying = playlist.state.tracks[playlist.state.currentIndex]?.id === trackId;
@@ -164,7 +157,7 @@ export function App() {
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <h1 className="text-lg font-bold tracking-wide">Repeit</h1>
-        <FilePicker onFiles={handleAddFiles} onFolder={handleAddFolder} />
+        <FilePicker onFiles={handleAddFiles} />
       </header>
 
       {/* Restore access banner */}

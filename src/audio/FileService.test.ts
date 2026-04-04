@@ -13,24 +13,6 @@ function createMockFileHandle(name: string): FileSystemFileHandle {
   } as unknown as FileSystemFileHandle;
 }
 
-function createMockDirectoryHandle(files: Map<string, FileSystemFileHandle>): FileSystemDirectoryHandle {
-  const entries = Array.from(files.entries());
-  let index = 0;
-  return {
-    kind: 'directory',
-    name: 'test-folder',
-    values: vi.fn().mockReturnValue({
-      next: () => {
-        if (index < entries.length) return Promise.resolve({ value: entries[index++][1], done: false });
-        return Promise.resolve({ value: undefined, done: true });
-      },
-      [Symbol.asyncIterator]() {
-        return this;
-      },
-    }),
-  } as unknown as FileSystemDirectoryHandle;
-}
-
 describe('FileService', () => {
   const fileService = new FileService();
 
@@ -46,23 +28,6 @@ describe('FileService', () => {
   it('requests permission and returns true if granted', async () => {
     const handle = createMockFileHandle('test.mp3');
     expect(await fileService.requestPermission(handle)).toBe(true);
-  });
-
-  it('scans directory for audio files', async () => {
-    const mp3 = createMockFileHandle('track1.mp3');
-    const wav = createMockFileHandle('track2.wav');
-    const txt = createMockFileHandle('notes.txt');
-    const dirHandle = createMockDirectoryHandle(
-      new Map([
-        ['track1.mp3', mp3],
-        ['track2.wav', wav],
-        ['notes.txt', txt],
-      ])
-    );
-    const result = await fileService.scanDirectory(dirHandle);
-    expect(result).toHaveLength(2);
-    expect(result.map(h => h.name)).toContain('track1.mp3');
-    expect(result.map(h => h.name)).toContain('track2.wav');
   });
 
   it('decodes a file handle to AudioBuffer', async () => {

@@ -55,14 +55,6 @@ export function usePlaylist() {
     [sync]
   );
 
-  const addFolder = useCallback(
-    async (dirHandle: FileSystemDirectoryHandle) => {
-      const handles = await fileServiceRef.current.scanDirectory(dirHandle);
-      await addFiles(handles);
-    },
-    [addFiles]
-  );
-
   const removeTrack = useCallback(
     (trackId: string) => {
       managerRef.current.removeTrack(trackId);
@@ -168,7 +160,6 @@ export function usePlaylist() {
     state,
     currentTrack,
     addFiles,
-    addFolder,
     removeTrack,
     reorder,
     next,
