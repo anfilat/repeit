@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePlaylist } from '../hooks/usePlaylist';
 import { useAudioEngine } from '../hooks/useAudioEngine';
 import { FilePicker } from './FilePicker';
@@ -17,6 +17,13 @@ export function App() {
   const audio = useAudioEngine();
   const loadingRef = useRef(false);
   const initialMountRef = useRef(true);
+  const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
+
+  useEffect(() => {
+    const onResize = () => setViewportHeight(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Load a track into the audio engine
   const loadAndPlay = useCallback(
@@ -153,7 +160,7 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-gray-900 text-white">
+    <div className="flex flex-col overflow-hidden bg-gray-900 text-white" style={{ height: viewportHeight }}>
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <h1 className="text-lg font-bold tracking-wide">Repeit</h1>
