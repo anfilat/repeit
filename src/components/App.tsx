@@ -16,6 +16,7 @@ export function App() {
   const audio = useAudioEngine();
   const loadingRef = useRef(false);
   const initialMountRef = useRef(true);
+  const lastSaveRef = useRef(0);
   const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
 
   useEffect(() => {
@@ -64,9 +65,25 @@ export function App() {
   useEffect(() => {
     if (playlist.state.currentIndex !== prevIndexRef.current && playlist.currentTrack) {
       prevIndexRef.current = playlist.state.currentIndex;
+      playlist.savePlaybackState(STORAGE_KEY, {
+        currentIndex: playlist.state.currentIndex,
+        position: 0,
+      });
       loadAndPlay(playlist.currentTrack);
     }
-  }, [playlist.state.currentIndex, playlist.currentTrack, loadAndPlay]);
+  }, [playlist.state.currentIndex, playlist.currentTrack, loadAndPlay, playlist]);
+
+  // Throttled save of playback state (~1s during playback)
+  useEffect(() => {
+    if (!audio.audioState.isPlaying) return;
+    const now = Date.now();
+    if (now - lastSaveRef.current < 1000) return;
+    lastSaveRef.current = now;
+    playlist.savePlaybackState(STORAGE_KEY, {
+      currentIndex: playlist.state.currentIndex,
+      position: audio.audioState.currentTime,
+    });
+  }, [audio.audioState, playlist.state.currentIndex, playlist]);
 
   // Save playlist handles when tracks change (skip initial mount to avoid
   // overwriting persisted data before loadPlaylist runs)
@@ -87,6 +104,10 @@ export function App() {
   const handlePlayPause = useCallback(() => {
     if (audio.audioState.isPlaying) {
       audio.pause();
+      playlist.savePlaybackState(STORAGE_KEY, {
+        currentIndex: playlist.state.currentIndex,
+        position: audio.audioState.currentTime,
+      });
     } else if (playlist.currentTrack) {
       if (audio.audioState.duration === 0) {
         loadAndPlay(playlist.currentTrack, true);
@@ -94,7 +115,7 @@ export function App() {
         audio.play();
       }
     }
-  }, [audio, playlist.currentTrack, loadAndPlay]);
+  }, [audio, playlist.currentTrack, playlist, loadAndPlay]);
 
   const handleNext = useCallback(() => {
     const track = playlist.next();
