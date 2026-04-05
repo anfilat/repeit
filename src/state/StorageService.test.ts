@@ -57,4 +57,24 @@ describe('StorageService', () => {
     expect(ids).toContain('pl1');
     expect(ids).toContain('pl2');
   });
+
+  describe('playback state', () => {
+    it('saves and retrieves playback state', async () => {
+      await service.savePlaybackState('default', { currentIndex: 2, position: 45.5 });
+      const state = await service.loadPlaybackState('default');
+      expect(state).toEqual({ currentIndex: 2, position: 45.5 });
+    });
+
+    it('returns null for nonexistent playback state', async () => {
+      const state = await service.loadPlaybackState('nonexistent');
+      expect(state).toBeNull();
+    });
+
+    it('overwrites existing playback state', async () => {
+      await service.savePlaybackState('default', { currentIndex: 0, position: 10 });
+      await service.savePlaybackState('default', { currentIndex: 1, position: 20 });
+      const state = await service.loadPlaybackState('default');
+      expect(state).toEqual({ currentIndex: 1, position: 20 });
+    });
+  });
 });
