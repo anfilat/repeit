@@ -22,6 +22,22 @@ export class PlaylistManager {
   }
 
   next(): Track | null {
+    const { tracks } = this.state;
+    if (tracks.length === 0) return null;
+    const nextIndex = (this.state.currentIndex + 1) % tracks.length;
+    this.state.currentIndex = nextIndex;
+    return tracks[nextIndex];
+  }
+
+  prev(): Track | null {
+    const { tracks, currentIndex } = this.state;
+    if (tracks.length === 0) return null;
+    const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+    this.state.currentIndex = prevIndex;
+    return tracks[prevIndex];
+  }
+
+  autoAdvance(): Track | null {
     const { tracks, currentIndex, repeat } = this.state;
     if (tracks.length === 0) return null;
     if (repeat === 'one') return tracks[currentIndex] ?? null;
@@ -35,13 +51,6 @@ export class PlaylistManager {
     }
     this.state.currentIndex = nextIndex;
     return tracks[nextIndex];
-  }
-
-  prev(): Track | null {
-    const { tracks, currentIndex } = this.state;
-    if (tracks.length === 0) return null;
-    this.state.currentIndex = Math.max(0, currentIndex - 1);
-    return tracks[this.state.currentIndex];
   }
 
   reorder(fromIndex: number, toIndex: number): void {

@@ -49,33 +49,22 @@ describe('PlaylistManager', () => {
     expect(pm.state.currentIndex).toBe(0);
   });
 
-  it('next beyond last with repeat off returns null', () => {
+  it('next beyond last wraps to first', () => {
     const pm = new PlaylistManager();
     pm.setTracks(tracks);
     pm.next();
     pm.next();
-    expect(pm.next()).toBeNull();
+    const result = pm.next();
+    expect(result).toEqual(tracks[0]);
+    expect(pm.state.currentIndex).toBe(0);
+  });
+
+  it('prev before first wraps to last', () => {
+    const pm = new PlaylistManager();
+    pm.setTracks(tracks);
+    const result = pm.prev();
+    expect(result).toEqual(tracks[2]);
     expect(pm.state.currentIndex).toBe(2);
-  });
-
-  it('next beyond last with repeat all wraps to first', () => {
-    const pm = new PlaylistManager();
-    pm.setTracks(tracks);
-    pm.setRepeat('all');
-    pm.next();
-    pm.next();
-    const result = pm.next();
-    expect(result).toEqual(tracks[0]);
-    expect(pm.state.currentIndex).toBe(0);
-  });
-
-  it('repeat one returns same track', () => {
-    const pm = new PlaylistManager();
-    pm.setTracks(tracks);
-    pm.setRepeat('one');
-    const result = pm.next();
-    expect(result).toEqual(tracks[0]);
-    expect(pm.state.currentIndex).toBe(0);
   });
 
   it('setCurrentIndex clamps to valid range', () => {
@@ -102,5 +91,34 @@ describe('PlaylistManager', () => {
     pm.removeTrack('a');
     expect(pm.state.tracks).toHaveLength(2);
     expect(pm.state.currentIndex).toBe(0);
+  });
+
+  describe('autoAdvance', () => {
+    it('with repeat off returns null at end', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks(tracks);
+      pm.next();
+      pm.next();
+      expect(pm.autoAdvance()).toBeNull();
+      expect(pm.state.currentIndex).toBe(2);
+    });
+
+    it('with repeat all wraps to first', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks(tracks);
+      pm.setRepeat('all');
+      pm.next();
+      pm.next();
+      expect(pm.autoAdvance()).toEqual(tracks[0]);
+      expect(pm.state.currentIndex).toBe(0);
+    });
+
+    it('with repeat one returns same track', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks(tracks);
+      pm.setRepeat('one');
+      expect(pm.autoAdvance()).toEqual(tracks[0]);
+      expect(pm.state.currentIndex).toBe(0);
+    });
   });
 });

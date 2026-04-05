@@ -48,7 +48,7 @@ export function App() {
 
   // Handle track end: advance to next track
   const handleTrackEnd = useCallback(() => {
-    const nextTrack = playlist.next();
+    const nextTrack = playlist.autoAdvance();
     if (nextTrack) {
       loadAndPlay(nextTrack, true);
     }

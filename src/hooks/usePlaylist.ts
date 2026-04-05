@@ -83,6 +83,12 @@ export function usePlaylist() {
     return track;
   }, [sync]);
 
+  const autoAdvance = useCallback((): Track | null => {
+    const track = managerRef.current.autoAdvance();
+    sync();
+    return track;
+  }, [sync]);
+
   const setCurrentIndex = useCallback(
     (index: number) => {
       managerRef.current.setCurrentIndex(index);
@@ -164,6 +170,7 @@ export function usePlaylist() {
     reorder,
     next,
     prev,
+    autoAdvance,
     setCurrentIndex,
     setRepeat,
     savePlaylist,
