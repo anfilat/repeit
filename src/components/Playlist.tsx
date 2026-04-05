@@ -10,10 +10,9 @@ interface PlaylistProps {
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (trackId: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
-  onClear: () => void;
 }
 
-export function Playlist({ tracks, currentIndex, onSelectTrack, onRemoveTrack, onReorder, onClear }: PlaylistProps) {
+export function Playlist({ tracks, currentIndex, onSelectTrack, onRemoveTrack, onReorder }: PlaylistProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -37,19 +36,6 @@ export function Playlist({ tracks, currentIndex, onSelectTrack, onRemoveTrack, o
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="flex items-center justify-between px-3 py-1 border-b border-gray-800">
-        <span className="text-xs text-gray-400">
-          {tracks.length} track{tracks.length !== 1 ? 's' : ''}
-        </span>
-        <button
-          onClick={() => {
-            if (confirm('Clear all tracks?')) onClear();
-          }}
-          className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-0.5"
-        >
-          Clear all
-        </button>
-      </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={tracks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-1 p-2">
