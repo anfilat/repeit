@@ -82,6 +82,16 @@ export function useAudioEngine() {
     engineRef.current?.seek(time);
   }, []);
 
+  const syncState = useCallback(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    setAudioState({
+      isPlaying: engine.isPlaying,
+      currentTime: engine.currentTime,
+      duration: engine.duration,
+    });
+  }, []);
+
   const stop = useCallback(() => {
     engineRef.current?.stop();
     stopTicking();
@@ -113,6 +123,7 @@ export function useAudioEngine() {
     play,
     pause,
     seek,
+    syncState,
     stop,
     setOnTrackEnd,
   };

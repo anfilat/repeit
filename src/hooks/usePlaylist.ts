@@ -139,6 +139,13 @@ export function usePlaylist() {
     []
   );
 
+  const loadPlaybackState = useCallback(
+    async (playlistId: string): Promise<{ currentIndex: number; position: number } | null> => {
+      return storageServiceRef.current.loadPlaybackState(playlistId);
+    },
+    []
+  );
+
   const savePlaylist = useCallback(async (playlistId: string) => {
     const handles = managerRef.current.state.tracks.map(t => t.handle);
     await storageServiceRef.current.saveHandles(playlistId, handles);
@@ -206,6 +213,7 @@ export function usePlaylist() {
     setRepeat,
     savePlaylist,
     savePlaybackState,
+    loadPlaybackState,
     loadPlaylist,
     restorePlaylist,
     pendingHandlesCount,

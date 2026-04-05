@@ -17,6 +17,7 @@ export function App() {
   const loadingRef = useRef(false);
   const initialMountRef = useRef(true);
   const lastSaveRef = useRef(0);
+  const seekAfterLoadRef = useRef<number | null>(null);
   const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
 
   useEffect(() => {
@@ -35,6 +36,14 @@ export function App() {
         const buffer = await fileService.decodeAudioFile(track.handle, ctx);
         ctx.close();
         await audio.loadBuffer(buffer);
+        const seekTo = seekAfterLoadRef.current;
+        if (seekTo !== null) {
+          audio.seek(seekTo);
+          seekAfterLoadRef.current = null;
+          if (!autoPlay) {
+            audio.syncState();
+          }
+        }
         if (autoPlay) {
           audio.play();
         }
@@ -95,9 +104,27 @@ export function App() {
     playlist.savePlaylist(STORAGE_KEY);
   }, [playlist.state.tracks, playlist]);
 
-  // Load persisted playlist on mount
+  // Load persisted playlist and restore playback state on mount
   useEffect(() => {
-    playlist.loadPlaylist(STORAGE_KEY);
+    const restore = async () => {
+      try {
+        await playlist.loadPlaylist(STORAGE_KEY);
+        const saved = await playlist.loadPlaybackState(STORAGE_KEY);
+        if (saved && playlist.state.tracks.length > saved.currentIndex) {
+          seekAfterLoadRef.current = saved.position;
+          if (saved.currentIndex === playlist.state.currentIndex) {
+            // Index didn't change, track-change effect won't fire — load directly
+            const track = playlist.currentTrack;
+            if (track) loadAndPlay(track, false);
+          } else {
+            playlist.setCurrentIndex(saved.currentIndex);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to restore playback state:', err);
+      }
+    };
+    restore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
