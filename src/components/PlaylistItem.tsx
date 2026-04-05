@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Track } from '../types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -43,7 +43,22 @@ export function PlaylistItem({
   isLast,
 }: PlaylistItemProps) {
   const isTouchDevice = useIsTouchDevice();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: track.id });
+
+  const ref = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollRef.current = node;
+      setNodeRef(node);
+    },
+    [setNodeRef]
+  );
+
+  useEffect(() => {
+    if (isActive) {
+      scrollRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [isActive]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -53,7 +68,7 @@ export function PlaylistItem({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={ref}
       style={style}
       className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer group ${
         isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-white/5'
