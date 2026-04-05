@@ -1,0 +1,91 @@
+import { useState, useEffect, useRef } from 'react';
+
+interface TrackMenuProps {
+  onPlay: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onDelete: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}
+
+export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, canMoveDown }: TrackMenuProps) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [open]);
+
+  const handleAction = (action: () => void) => {
+    setOpen(false);
+    action();
+  };
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        onClick={e => {
+          e.stopPropagation();
+          setOpen(v => !v);
+        }}
+        className="p-1 rounded hover:bg-white/10 transition-colors text-gray-500 hover:text-gray-300"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="3" r="1.5" />
+          <circle cx="8" cy="8" r="1.5" />
+          <circle cx="8" cy="13" r="1.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-gray-800 rounded-lg shadow-lg shadow-black/50 py-1 min-w-[180px] z-50">
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleAction(onPlay);
+            }}
+            className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-white/5 transition-colors"
+          >
+            {'\u25B6'} Воспроизвести
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleAction(onMoveUp);
+            }}
+            disabled={!canMoveUp}
+            className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+          >
+            {'\u25B2'} Переместить вверх
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleAction(onMoveDown);
+            }}
+            disabled={!canMoveDown}
+            className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+          >
+            {'\u25BC'} Переместить вниз
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleAction(onDelete);
+            }}
+            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-white/5 transition-colors"
+          >
+            {'\uD83D\uDDD1'} Удалить
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

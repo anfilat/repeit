@@ -10,9 +10,19 @@ interface PlaylistProps {
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (trackId: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
+  onMoveUp: (index: number) => void;
+  onMoveDown: (index: number) => void;
 }
 
-export function Playlist({ tracks, currentIndex, onSelectTrack, onRemoveTrack, onReorder }: PlaylistProps) {
+export function Playlist({
+  tracks,
+  currentIndex,
+  onSelectTrack,
+  onRemoveTrack,
+  onReorder,
+  onMoveUp,
+  onMoveDown,
+}: PlaylistProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -46,6 +56,10 @@ export function Playlist({ tracks, currentIndex, onSelectTrack, onRemoveTrack, o
                 isActive={index === currentIndex}
                 onSelect={() => onSelectTrack(index)}
                 onRemove={() => onRemoveTrack(track.id)}
+                onMoveUp={() => onMoveUp(index)}
+                onMoveDown={() => onMoveDown(index)}
+                isFirst={index === 0}
+                isLast={index === tracks.length - 1}
               />
             ))}
           </div>

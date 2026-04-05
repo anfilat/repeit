@@ -122,7 +122,7 @@ export function App() {
       playlist.setCurrentIndex(index);
       const track = playlist.state.tracks[index];
       if (track) {
-        loadAndPlay(track);
+        loadAndPlay(track, true);
       }
     },
     [playlist, loadAndPlay]
@@ -153,6 +153,20 @@ export function App() {
   const handleReorder = useCallback(
     (fromIndex: number, toIndex: number) => {
       playlist.reorder(fromIndex, toIndex);
+    },
+    [playlist]
+  );
+
+  const handleMoveUp = useCallback(
+    (index: number) => {
+      if (index > 0) playlist.reorder(index, index - 1);
+    },
+    [playlist]
+  );
+
+  const handleMoveDown = useCallback(
+    (index: number) => {
+      if (index < playlist.state.tracks.length - 1) playlist.reorder(index, index + 1);
     },
     [playlist]
   );
@@ -196,6 +210,8 @@ export function App() {
         onSelectTrack={handleSelectTrack}
         onRemoveTrack={handleRemoveTrack}
         onReorder={handleReorder}
+        onMoveUp={handleMoveUp}
+        onMoveDown={handleMoveDown}
       />
 
       {/* Player bar */}
