@@ -29,7 +29,7 @@ Audio player PWA using Web Audio API + File System Access API. Chrome/Edge only.
 **Three-layer architecture:**
 
 1. **Services** (`src/audio/`, `src/state/`) — Pure logic classes, no React:
-   - `AudioEngine` — Web Audio API wrapper (AudioContext → AudioBufferSourceNode → GainNode → destination). Handles play/pause/seek/stop/volume. Creates new sourceNode per play (Web Audio API requirement).
+   - `AudioEngine` — Web Audio API wrapper (AudioContext → AudioBufferSourceNode → destination). Handles play/pause/seek/stop. Creates new sourceNode per play (Web Audio API requirement).
    - `FileService` — File System Access API: file/folder picking, permission requests, audio decoding via `audioContext.decodeAudioData()`.
    - `PlaylistManager` — Mutable state: track list, current index, repeat mode (off/all/one), reorder, remove.
    - `StorageService` — IndexedDB persistence of `FileSystemFileHandle` objects for session restoration.

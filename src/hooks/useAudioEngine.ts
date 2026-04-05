@@ -9,7 +9,6 @@ export function useAudioEngine() {
     isPlaying: false,
     currentTime: 0,
     duration: 0,
-    volume: 1,
   });
 
   const tick = useCallback(() => {
@@ -19,7 +18,6 @@ export function useAudioEngine() {
       isPlaying: engine.isPlaying,
       currentTime: engine.currentTime,
       duration: engine.duration,
-      volume: engine.volume,
     });
     rafRef.current = requestAnimationFrame(tick);
   }, []);
@@ -56,7 +54,6 @@ export function useAudioEngine() {
         isPlaying: false,
         currentTime: 0,
         duration: engine.duration,
-        volume: engine.volume,
       });
     },
     [ensureEngine]
@@ -77,7 +74,6 @@ export function useAudioEngine() {
         isPlaying: false,
         currentTime: engineRef.current.currentTime,
         duration: engineRef.current.duration,
-        volume: engineRef.current.volume,
       });
     }
   }, [stopTicking]);
@@ -94,18 +90,9 @@ export function useAudioEngine() {
         isPlaying: false,
         currentTime: 0,
         duration: engineRef.current.duration,
-        volume: engineRef.current.volume,
       });
     }
   }, [stopTicking]);
-
-  const setVolume = useCallback(
-    (value: number) => {
-      const engine = ensureEngine();
-      engine.setVolume(value);
-    },
-    [ensureEngine]
-  );
 
   const setOnTrackEnd = useCallback((callback: (() => void) | null) => {
     if (engineRef.current) {
@@ -127,7 +114,6 @@ export function useAudioEngine() {
     pause,
     seek,
     stop,
-    setVolume,
     setOnTrackEnd,
   };
 }

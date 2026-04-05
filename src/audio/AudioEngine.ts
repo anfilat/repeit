@@ -1,25 +1,18 @@
 export class AudioEngine {
   private ctx: AudioContext;
-  private gainNode: GainNode;
   private sourceNode: AudioBufferSourceNode | null = null;
   private buffer: AudioBuffer | null = null;
   private _isPlaying = false;
-  private _volume = 1;
   private startContextTime = 0;
   private offset = 0;
   public onTrackEnd: (() => void) | null = null;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
-    this.gainNode = ctx.createGain();
-    this.gainNode.connect(ctx.destination);
   }
 
   get isPlaying(): boolean {
     return this._isPlaying;
-  }
-  get volume(): number {
-    return this._volume;
   }
   get duration(): number {
     return this.buffer?.duration ?? 0;
@@ -64,16 +57,11 @@ export class AudioEngine {
     this.offset = 0;
   }
 
-  setVolume(value: number): void {
-    this._volume = Math.max(0, Math.min(1, value));
-    this.gainNode.gain.setValueAtTime(this._volume, this.ctx.currentTime);
-  }
-
   private _createSource(startOffset: number): void {
     if (!this.buffer) return;
     this.sourceNode = this.ctx.createBufferSource();
     this.sourceNode.buffer = this.buffer;
-    this.sourceNode.connect(this.gainNode);
+    this.sourceNode.connect(this.ctx.destination);
     this.sourceNode.onended = () => {
       if (this._isPlaying) {
         this._isPlaying = false;

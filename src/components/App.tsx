@@ -5,7 +5,6 @@ import { FilePicker } from './FilePicker';
 import { Playlist } from './Playlist';
 import { PlayerControls } from './PlayerControls';
 import { ProgressBar } from './ProgressBar';
-import { VolumeControl } from './VolumeControl';
 import { FileService } from '../audio/FileService';
 import type { Track, RepeatMode } from '../types';
 
@@ -196,8 +195,7 @@ export function App() {
           duration={audio.audioState.duration}
           onSeek={audio.seek}
         />
-        <div className="flex items-center justify-between">
-          <VolumeControl volume={audio.audioState.volume} onVolumeChange={audio.setVolume} />
+        <div className="flex items-center justify-center">
           <PlayerControls
             isPlaying={audio.audioState.isPlaying}
             repeat={playlist.state.repeat}
@@ -206,7 +204,6 @@ export function App() {
             onPrev={handlePrev}
             onRepeat={cycleRepeat}
           />
-          <div className="w-32" /> {/* Balance spacer */}
         </div>
       </footer>
     </div>
