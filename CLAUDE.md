@@ -40,8 +40,10 @@ Audio player PWA using Web Audio API + File System Access API. Chrome/Edge only.
 
 3. **Components** (`src/components/`) — UI with Tailwind CSS + dnd-kit for drag-and-drop reordering. `App.tsx` wires hooks together: auto-loads track on index change, auto-advances on track end, persists handles on track changes.
 
+**Core types** in `src/types.ts`: `Track`, `RepeatMode` (`off`/`all`/`one`), `PlaylistState`, `AudioState`.
+
 **Key constraint:** AudioBuffer is uncompressed (~10MB/min). Only current track's buffer is loaded. AudioContext must be created from user gesture (Chrome autoplay policy).
 
 ## Testing
 
-Vitest with `happy-dom` environment and `fake-indexeddb` for IndexedDB tests. AudioContext is mocked via `src/audio/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression.
+Vitest with `happy-dom` environment and `fake-indexeddb` for IndexedDB tests. Test config is in `vite.config.ts`. Tests use Vitest globals (`describe`, `it`, `expect`) — no imports needed. AudioContext is mocked via `src/audio/audioContextMock.ts` — provides `_advanceTime(ms)` to simulate time progression.
