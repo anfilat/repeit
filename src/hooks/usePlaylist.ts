@@ -27,7 +27,7 @@ export function usePlaylist() {
   }, []);
 
   const addFiles = useCallback(
-    async (handles: FileSystemFileHandle[]) => {
+    async (handles: FileSystemFileHandle[], autoSelect = true) => {
       const audioHandles = fileServiceRef.current.filterAudioFiles(handles);
       if (audioHandles.length === 0) return;
 
@@ -58,7 +58,7 @@ export function usePlaylist() {
       const mgr = managerRef.current;
       const isFirstLoad = mgr.state.tracks.length === 0;
       mgr.state.tracks = [...mgr.state.tracks, ...newTracks];
-      if (isFirstLoad && mgr.state.tracks.length > 0) {
+      if (isFirstLoad && autoSelect && mgr.state.tracks.length > 0) {
         mgr.state.currentIndex = 0;
       }
       sync();
@@ -167,7 +167,7 @@ export function usePlaylist() {
         else pending.push(handle);
       }
       if (granted.length > 0) {
-        await addFiles(granted);
+        await addFiles(granted, false);
       }
       if (pending.length > 0) {
         pendingHandlesRef.current = pending;
