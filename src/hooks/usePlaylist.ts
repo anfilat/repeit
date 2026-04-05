@@ -3,6 +3,7 @@ import type { Track, RepeatMode, PlaylistState } from '../types';
 import { PlaylistManager } from '../state/PlaylistManager';
 import { FileService } from '../audio/FileService';
 import { StorageService } from '../state/StorageService';
+import { naturalCompare } from '../utils/naturalSort';
 
 export function usePlaylist() {
   const managerRef = useRef(new PlaylistManager());
@@ -75,6 +76,11 @@ export function usePlaylist() {
     },
     [sync]
   );
+
+  const sortTracks = useCallback(() => {
+    managerRef.current.sort((a, b) => naturalCompare(a.name, b.name));
+    sync();
+  }, [sync]);
 
   const next = useCallback((): Track | null => {
     const track = managerRef.current.next();
@@ -174,6 +180,7 @@ export function usePlaylist() {
     clearPlaylist,
     removeTrack,
     reorder,
+    sortTracks,
     next,
     prev,
     autoAdvance,
