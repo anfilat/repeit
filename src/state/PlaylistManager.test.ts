@@ -6,6 +6,10 @@ function createTrack(id: string): Track {
   return { id, name: `${id}.mp3`, duration: 180, handle: { kind: 'file', name: `${id}.mp3` } as FileSystemFileHandle };
 }
 
+function createTrackNamed(name: string): Track {
+  return { id: name, name, duration: 180, handle: { kind: 'file', name: `${name}.mp3` } as FileSystemFileHandle };
+}
+
 describe('PlaylistManager', () => {
   const tracks = [createTrack('a'), createTrack('b'), createTrack('c')];
 
@@ -118,6 +122,55 @@ describe('PlaylistManager', () => {
       pm.setTracks(tracks);
       pm.setRepeat('one');
       expect(pm.autoAdvance()).toEqual(tracks[0]);
+      expect(pm.state.currentIndex).toBe(0);
+    });
+  });
+
+  describe('sort', () => {
+    it('sorts tracks using comparator', () => {
+      const pm = new PlaylistManager();
+      const tracks = [createTrackNamed('Track 10'), createTrackNamed('Track 1'), createTrackNamed('Track 2')];
+      pm.setTracks(tracks);
+      pm.sort((a, b) => a.name.localeCompare(b.name));
+      expect(pm.state.tracks.map(t => t.name)).toEqual(['Track 1', 'Track 10', 'Track 2']);
+    });
+
+    it('updates currentIndex to follow current track after sort', () => {
+      const pm = new PlaylistManager();
+      const tracks = [createTrackNamed('Track 10'), createTrackNamed('Track 1'), createTrackNamed('Track 2')];
+      pm.setTracks(tracks);
+      expect(pm.state.tracks[pm.state.currentIndex].name).toBe('Track 10');
+      pm.sort((a, b) => {
+        const ax = a.name.split(/(\d+)/);
+        const bx = b.name.split(/(\d+)/);
+        for (let i = 0; i < Math.min(ax.length, bx.length); i++) {
+          if (i % 2 === 0) {
+            const cmp = ax[i].localeCompare(bx[i]);
+            if (cmp !== 0) return cmp;
+          } else {
+            const diff = Number(ax[i]) - Number(bx[i]);
+            if (diff !== 0) return diff;
+          }
+        }
+        return ax.length - bx.length;
+      });
+      expect(pm.state.tracks.map(t => t.name)).toEqual(['Track 1', 'Track 2', 'Track 10']);
+      expect(pm.state.currentIndex).toBe(2);
+      expect(pm.state.tracks[pm.state.currentIndex].name).toBe('Track 10');
+    });
+
+    it('does not crash on empty playlist', () => {
+      const pm = new PlaylistManager();
+      pm.sort((a, b) => a.name.localeCompare(b.name));
+      expect(pm.state.tracks).toEqual([]);
+      expect(pm.state.currentIndex).toBe(-1);
+    });
+
+    it('does not crash on single track', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks([createTrackNamed('Solo')]);
+      pm.sort((a, b) => a.name.localeCompare(b.name));
+      expect(pm.state.tracks.map(t => t.name)).toEqual(['Solo']);
       expect(pm.state.currentIndex).toBe(0);
     });
   });

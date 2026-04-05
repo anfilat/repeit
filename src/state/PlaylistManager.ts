@@ -83,4 +83,14 @@ export class PlaylistManager {
       this.state.currentIndex = Math.max(0, this.state.currentIndex - 1);
     }
   }
+
+  sort(compareFn: (a: Track, b: Track) => number): void {
+    const { tracks, currentIndex } = this.state;
+    if (tracks.length <= 1) return;
+    const currentId = currentIndex >= 0 ? tracks[currentIndex].id : undefined;
+    tracks.sort(compareFn);
+    if (currentId !== undefined) {
+      this.state.currentIndex = tracks.findIndex(t => t.id === currentId);
+    }
+  }
 }
