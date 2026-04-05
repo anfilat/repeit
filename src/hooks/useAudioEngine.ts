@@ -79,7 +79,14 @@ export function useAudioEngine() {
   }, [stopTicking]);
 
   const seek = useCallback((time: number) => {
-    engineRef.current?.seek(time);
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.seek(time);
+    setAudioState({
+      isPlaying: engine.isPlaying,
+      currentTime: engine.currentTime,
+      duration: engine.duration,
+    });
   }, []);
 
   const syncState = useCallback(() => {

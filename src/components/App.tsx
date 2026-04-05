@@ -128,6 +128,17 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSeek = useCallback(
+    (time: number) => {
+      audio.seek(time);
+      playlist.savePlaybackState(STORAGE_KEY, {
+        currentIndex: playlist.state.currentIndex,
+        position: time,
+      });
+    },
+    [audio, playlist]
+  );
+
   const handlePlayPause = useCallback(() => {
     if (audio.audioState.isPlaying) {
       audio.pause();
@@ -272,7 +283,7 @@ export function App() {
         <ProgressBar
           currentTime={audio.audioState.currentTime}
           duration={audio.audioState.duration}
-          onSeek={audio.seek}
+          onSeek={handleSeek}
         />
         <div className="flex items-center justify-between">
           {/* Left: track count */}

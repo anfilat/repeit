@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 
 interface ProgressBarProps {
   currentTime: number;
@@ -14,29 +14,72 @@ function formatTime(seconds: number): string {
 
 export function ProgressBar({ currentTime, duration, onSeek }: ProgressBarProps) {
   const barRef = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [dragTime, setDragTime] = useState<number | null>(null);
+
+  const displayTime = dragging && dragTime !== null ? dragTime : currentTime;
+  const progress = duration > 0 ? (displayTime / duration) * 100 : 0;
+
+  const getTimeFromX = useCallback(
+    (clientX: number) => {
+      if (!barRef.current || duration === 0) return 0;
+      const rect = barRef.current.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      return ratio * duration;
+    },
+    [duration]
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!barRef.current || duration === 0) return;
-      const rect = barRef.current.getBoundingClientRect();
-      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      onSeek(ratio * duration);
+      if (duration === 0) return;
+      onSeek(getTimeFromX(e.clientX));
     },
-    [duration, onSeek]
+    [duration, onSeek, getTimeFromX]
   );
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setDragging(true);
+      setDragTime(getTimeFromX(e.clientX));
+    },
+    [getTimeFromX]
+  );
+
+  useEffect(() => {
+    if (!dragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setDragTime(getTimeFromX(e.clientX));
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      const time = getTimeFromX(e.clientX);
+      onSeek(time);
+      setDragging(false);
+      setDragTime(null);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragging, getTimeFromX, onSeek]);
 
   return (
     <div className="flex items-center gap-3 w-full">
-      <span className="text-xs text-gray-400 w-10 text-right tabular-nums">{formatTime(currentTime)}</span>
+      <span className="text-xs text-gray-400 w-10 text-right tabular-nums">{formatTime(displayTime)}</span>
       <div
         ref={barRef}
         onClick={handleClick}
-        className="flex-1 h-2 bg-gray-700 rounded-full cursor-pointer relative group"
+        onMouseDown={handleMouseDown}
+        className="flex-1 h-2 bg-gray-700 rounded-full cursor-pointer relative"
       >
         <div className="h-full bg-blue-500 rounded-full relative" style={{ width: `${progress}%` }}>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full translate-x-1/2" />
         </div>
       </div>
       <span className="text-xs text-gray-400 w-10 tabular-nums">{formatTime(duration)}</span>
