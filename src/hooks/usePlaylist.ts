@@ -5,8 +5,18 @@ import { FileService } from '../audio/FileService';
 import { StorageService } from '../state/StorageService';
 import { naturalCompare } from '../utils/naturalSort';
 
+const REPEAT_STORAGE_KEY = 'repeit-repeat-mode';
+
 export function usePlaylist() {
   const managerRef = useRef(new PlaylistManager());
+  const repeatRestoredRef = useRef(false);
+  if (!repeatRestoredRef.current) {
+    repeatRestoredRef.current = true;
+    const saved = localStorage.getItem(REPEAT_STORAGE_KEY);
+    if (saved === 'off' || saved === 'all' || saved === 'one') {
+      managerRef.current.setRepeat(saved);
+    }
+  }
   const fileServiceRef = useRef(new FileService());
   const storageServiceRef = useRef(new StorageService());
 
@@ -111,6 +121,7 @@ export function usePlaylist() {
   const setRepeat = useCallback(
     (mode: RepeatMode) => {
       managerRef.current.setRepeat(mode);
+      localStorage.setItem(REPEAT_STORAGE_KEY, mode);
       sync();
     },
     [sync]
