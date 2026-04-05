@@ -55,6 +55,11 @@ export function usePlaylist() {
     [sync]
   );
 
+  const clearPlaylist = useCallback(() => {
+    managerRef.current.clear();
+    sync();
+  }, [sync]);
+
   const removeTrack = useCallback(
     (trackId: string) => {
       managerRef.current.removeTrack(trackId);
@@ -166,6 +171,7 @@ export function usePlaylist() {
     state,
     currentTrack,
     addFiles,
+    clearPlaylist,
     removeTrack,
     reorder,
     next,

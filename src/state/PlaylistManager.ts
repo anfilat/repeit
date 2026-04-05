@@ -68,6 +68,11 @@ export class PlaylistManager {
     }
   }
 
+  clear(): void {
+    this.state.tracks = [];
+    this.state.currentIndex = -1;
+  }
+
   removeTrack(trackId: string): void {
     const index = this.state.tracks.findIndex(t => t.id === trackId);
     if (index === -1) return;

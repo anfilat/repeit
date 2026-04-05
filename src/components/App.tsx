@@ -158,6 +158,11 @@ export function App() {
     [playlist]
   );
 
+  const handleClearPlaylist = useCallback(() => {
+    audio.stop();
+    playlist.clearPlaylist();
+  }, [audio, playlist]);
+
   return (
     <div className="flex flex-col overflow-hidden bg-gray-900 text-white" style={{ height: viewportHeight }}>
       {/* Header */}
@@ -186,6 +191,7 @@ export function App() {
         onSelectTrack={handleSelectTrack}
         onRemoveTrack={handleRemoveTrack}
         onReorder={handleReorder}
+        onClear={handleClearPlaylist}
       />
 
       {/* Player bar */}
