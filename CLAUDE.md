@@ -20,7 +20,7 @@ npx vitest run src/audio/AudioEngine.test.ts  # Run a single test file
 
 **Tools:** oxlint (linter), oxfmt (formatter).
 
-**Workflow:** Pre-commit hook runs `lint + format:check + test` (check-only, no modifications). Fix manually with `lint:fix` and `format` commands before committing.
+**Workflow:** After making code changes, run `npm run lint:fix` and `npm run format` to auto-fix issues. Pre-commit hook runs `lint + format:check + test` (check-only, no modifications).
 
 ## Architecture
 
