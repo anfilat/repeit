@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" fill="#1e293b" rx="102.4"/>
-  <circle cx="256" cy="204.8" r="76.8" fill="#3b82f6"/>
-  <path d="M 128 332.8 L 128 435.2 L 384 435.2 L 384 332.8 Z" fill="#3b82f6"/>
-  <circle cx="179.2" cy="384" r="15.36" fill="#1e293b"/>
-  <circle cx="256" cy="384" r="15.36" fill="#1e293b"/>
-  <circle cx="332.8" cy="384" r="15.36" fill="#1e293b"/>
+  <g transform="translate(256,256)">
+    <path d="M 0,-153.6 A 153.6,153.6 0 1,1 -133.02,76.8" fill="none" stroke="#0c5bf5" stroke-width="41.6" stroke-linecap="round"/>
+    <path d="M 0,153.6 A 153.6,153.6 0 1,1 133.02,-76.8" fill="none" stroke="#0c5bf5" stroke-width="41.6" stroke-linecap="round"/>
+    <polygon points="-172.8,99.2 -108.8,121.6 -92.8,54.4" fill="#0c5bf5"/>
+    <polygon points="172.8,-99.2 108.8,-121.6 92.8,-54.4" fill="#0c5bf5"/>
+    <circle cx="-38.4" cy="0" r="19.2" fill="#3b82f6" opacity="0.7"/>
+    <circle cx="9.6" cy="0" r="14.4" fill="#3b82f6" opacity="0.4"/>
+    <circle cx="48" cy="0" r="10.24" fill="#3b82f6" opacity="0.25"/>
+  </g>
 </svg>
