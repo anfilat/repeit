@@ -41,6 +41,10 @@ export function App() {
         if (seekTo !== null) {
           audio.seek(seekTo);
           seekAfterLoadRef.current = null;
+          playlist.savePlaybackState(STORAGE_KEY, {
+            currentIndex: playlist.state.currentIndex,
+            position: seekTo,
+          });
           if (!autoPlay) {
             audio.syncState();
           }

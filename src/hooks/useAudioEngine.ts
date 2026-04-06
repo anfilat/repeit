@@ -32,13 +32,22 @@ export function useAudioEngine() {
   }, []);
 
   const ctxRef = useRef<AudioContext | null>(null);
+  const pendingBufferRef = useRef<AudioBuffer | null>(null);
+  const pendingSeekRef = useRef<number | null>(null);
 
-  // Ensure AudioContext is created on first user interaction
+  // Ensure AudioContext is created on first user interaction (play)
   const ensureEngine = useCallback((): AudioEngine => {
     if (!engineRef.current) {
       const ctx = new AudioContext();
       ctxRef.current = ctx;
       engineRef.current = new AudioEngine(ctx);
+      if (pendingBufferRef.current) {
+        engineRef.current.loadBuffer(pendingBufferRef.current);
+      }
+      if (pendingSeekRef.current !== null) {
+        engineRef.current.seek(pendingSeekRef.current);
+        pendingSeekRef.current = null;
+      }
     }
     if (ctxRef.current?.state === 'suspended') {
       ctxRef.current.resume();
@@ -46,18 +55,18 @@ export function useAudioEngine() {
     return engineRef.current;
   }, []);
 
-  const loadBuffer = useCallback(
-    async (buffer: AudioBuffer) => {
-      const engine = ensureEngine();
-      await engine.loadBuffer(buffer);
-      setAudioState({
-        isPlaying: false,
-        currentTime: 0,
-        duration: engine.duration,
-      });
-    },
-    [ensureEngine]
-  );
+  const loadBuffer = useCallback(async (buffer: AudioBuffer) => {
+    pendingBufferRef.current = buffer;
+    pendingSeekRef.current = null;
+    if (engineRef.current) {
+      await engineRef.current.loadBuffer(buffer);
+    }
+    setAudioState({
+      isPlaying: false,
+      currentTime: 0,
+      duration: buffer.duration,
+    });
+  }, []);
 
   const play = useCallback(async () => {
     const engine = ensureEngine();
@@ -83,7 +92,11 @@ export function useAudioEngine() {
 
   const seek = useCallback((time: number) => {
     const engine = engineRef.current;
-    if (!engine) return;
+    if (!engine) {
+      pendingSeekRef.current = time;
+      setAudioState(s => ({ ...s, currentTime: time }));
+      return;
+    }
     engine.seek(time);
     setAudioState({
       isPlaying: engine.isPlaying,
@@ -94,7 +107,13 @@ export function useAudioEngine() {
 
   const syncState = useCallback(() => {
     const engine = engineRef.current;
-    if (!engine) return;
+    if (!engine) {
+      setAudioState(s => ({
+        ...s,
+        currentTime: pendingSeekRef.current ?? s.currentTime,
+      }));
+      return;
+    }
     setAudioState({
       isPlaying: engine.isPlaying,
       currentTime: engine.currentTime,
