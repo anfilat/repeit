@@ -59,13 +59,18 @@ export function useAudioEngine() {
     [ensureEngine]
   );
 
-  const play = useCallback(() => {
+  const play = useCallback(async () => {
+    console.log('play');
     const engine = ensureEngine();
+    if (ctxRef.current?.state === 'suspended') {
+      await ctxRef.current.resume();
+    }
     engine.play();
     startTicking();
   }, [ensureEngine, startTicking]);
 
   const pause = useCallback(() => {
+    console.log('pause');
     engineRef.current?.pause();
     stopTicking();
     // One final state sync
@@ -133,5 +138,6 @@ export function useAudioEngine() {
     syncState,
     stop,
     setOnTrackEnd,
+    stream: engineRef.current?.stream ?? null,
   };
 }

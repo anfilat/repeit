@@ -5,6 +5,7 @@ export class AudioEngine {
   private _isPlaying = false;
   private startContextTime = 0;
   private offset = 0;
+  private streamDest: MediaStreamAudioDestinationNode | null = null;
   public onTrackEnd: (() => void) | null = null;
 
   constructor(ctx: AudioContext) {
@@ -20,6 +21,9 @@ export class AudioEngine {
   get currentTime(): number {
     if (this._isPlaying) return this.offset + (this.ctx.currentTime - this.startContextTime);
     return this.offset;
+  }
+  get stream(): MediaStream | null {
+    return this.streamDest?.stream ?? null;
   }
 
   async loadBuffer(buffer: AudioBuffer): Promise<void> {
@@ -62,6 +66,12 @@ export class AudioEngine {
     this.sourceNode = this.ctx.createBufferSource();
     this.sourceNode.buffer = this.buffer;
     this.sourceNode.connect(this.ctx.destination);
+
+    if (!this.streamDest) {
+      this.streamDest = this.ctx.createMediaStreamDestination();
+    }
+    this.sourceNode.connect(this.streamDest);
+
     this.sourceNode.onended = () => {
       if (this._isPlaying) {
         this._isPlaying = false;

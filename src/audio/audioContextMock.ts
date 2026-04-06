@@ -25,6 +25,11 @@ export function createMockAudioContext() {
       connect: vi.fn(),
       disconnect: vi.fn(),
     })),
+    createMediaStreamDestination: vi.fn(() => ({
+      stream: new MediaStream(),
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+    })),
     decodeAudioData: vi.fn().mockResolvedValue(mockAudioBuffer),
     destination: Symbol('destination'),
     get currentTime() {

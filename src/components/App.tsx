@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePlaylist } from '../hooks/usePlaylist';
 import { useAudioEngine } from '../hooks/useAudioEngine';
+import { useMediaSession } from '../hooks/useMediaSession';
 import { Playlist } from './Playlist';
 import { PlayerControls } from './PlayerControls';
 import { PlaylistMenu } from './PlaylistMenu';
@@ -239,6 +240,19 @@ export function App() {
   const handleSort = useCallback(() => {
     playlist.sortTracks();
   }, [playlist]);
+
+  // Media Session API: lock screen / notification controls
+  useMediaSession({
+    track: playlist.currentTrack ?? null,
+    isPlaying: audio.audioState.isPlaying,
+    duration: audio.audioState.duration,
+    currentTime: audio.audioState.currentTime,
+    onPlay: () => audio.play(),
+    onPause: () => audio.pause(),
+    onNext: handleNext,
+    onPrevious: handlePrev,
+    onSeek: handleSeek,
+  });
 
   const handleSelectFiles = useCallback(async () => {
     try {
