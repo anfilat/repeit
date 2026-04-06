@@ -60,7 +60,6 @@ export function useAudioEngine() {
   );
 
   const play = useCallback(async () => {
-    console.log('play');
     const engine = ensureEngine();
     if (ctxRef.current?.state === 'suspended') {
       await ctxRef.current.resume();
@@ -70,7 +69,6 @@ export function useAudioEngine() {
   }, [ensureEngine, startTicking]);
 
   const pause = useCallback(() => {
-    console.log('pause');
     engineRef.current?.pause();
     stopTicking();
     // One final state sync
