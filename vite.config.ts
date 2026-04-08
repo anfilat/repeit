@@ -6,16 +6,20 @@ import { VitePWA } from 'vite-plugin-pwa';
 import fs from 'fs';
 import path from 'path';
 
+const base = process.env.VITE_BASE || '/repeit/';
+const isBeta = base.includes('beta');
+
 export default defineConfig({
-  base: process.env.VITE_BASE || '/repeit/',
+  base,
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Repeit',
-        short_name: 'Repeit',
+        id: base,
+        name: isBeta ? 'Repeit Beta' : 'Repeit',
+        short_name: isBeta ? 'Repeit Beta' : 'Repeit',
         description: 'Audio player PWA',
         theme_color: '#1e293b',
         background_color: '#0f172a',
@@ -28,6 +32,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         cleanupOutdatedCaches: true,
+        cacheId: isBeta ? 'repeit-beta' : 'repeit',
       },
     }),
     {
