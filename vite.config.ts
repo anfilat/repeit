@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 
 export default defineConfig({
-  base: '/repeit/',
+  base: process.env.VITE_BASE || '/repeit/',
   plugins: [
     react(),
     tailwindcss(),
