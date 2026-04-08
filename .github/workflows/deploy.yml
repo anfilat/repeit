@@ -1,0 +1,62 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, beta]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if beta branch exists
+        id: beta
+        run: |
+          if git ls-remote --heads ${{ github.server_url }}/${{ github.repository }}.git beta | grep -q .; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Build main
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: src-main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src-main/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: src-main
+      - run: mv src-main/dist dist-main
+
+      # Build beta (only if branch exists)
+      - uses: actions/checkout@v4
+        if: steps.beta.outputs.exists == 'true'
+        with:
+          ref: beta
+          path: src-beta
+      - run: npm ci && npm run build
+        if: steps.beta.outputs.exists == 'true'
+        working-directory: src-beta
+        env:
+          VITE_BASE: /repeit/beta/
+      - run: mv src-beta/dist dist-beta
+        if: steps.beta.outputs.exists == 'true'
+
+      # Combine
+      - run: mkdir dist && mv dist-main/* dist/
+      - run: mv dist-beta dist/beta
+        if: steps.beta.outputs.exists == 'true'
+
+      # Deploy
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
