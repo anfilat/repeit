@@ -33,10 +33,8 @@ export function App() {
       if (loadingRef.current) return;
       loadingRef.current = true;
       try {
-        const ctx = new AudioContext();
-        const buffer = await fileService.decodeAudioFile(track.handle, ctx);
-        ctx.close();
-        await audio.loadBuffer(buffer);
+        const url = await fileService.createObjectUrl(track.handle);
+        await audio.loadUrl(url);
         const seekTo = seekAfterLoadRef.current;
         if (seekTo !== null) {
           audio.seek(seekTo);
@@ -58,7 +56,7 @@ export function App() {
         loadingRef.current = false;
       }
     },
-    [audio]
+    [audio, playlist]
   );
 
   // Handle track end: advance to next track

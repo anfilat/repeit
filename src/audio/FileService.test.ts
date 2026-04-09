@@ -30,11 +30,9 @@ describe('FileService', () => {
     expect(await fileService.requestPermission(handle)).toBe(true);
   });
 
-  it('decodes a file handle to AudioBuffer', async () => {
-    const mockBuffer = { duration: 180, sampleRate: 44100 } as AudioBuffer;
-    const mockCtx = { decodeAudioData: vi.fn().mockResolvedValue(mockBuffer) } as unknown as AudioContext;
+  it('creates an object URL from a file handle', async () => {
     const handle = createMockFileHandle('test.mp3');
-    const result = await fileService.decodeAudioFile(handle, mockCtx);
-    expect(result).toBe(mockBuffer);
+    const url = await fileService.createObjectUrl(handle);
+    expect(url).toMatch(/^blob:/);
   });
 });

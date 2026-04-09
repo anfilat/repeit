@@ -1,78 +1,129 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioEngine } from './AudioEngine';
-import { createMockAudioContext } from './audioContextMock';
+
+let mockAudio: {
+  paused: boolean;
+  currentTime: number;
+  duration: number;
+  src: string;
+  oncanplay: (() => void) | null;
+  onerror: (() => void) | null;
+  play: ReturnType<typeof vi.fn>;
+  pause: ReturnType<typeof vi.fn>;
+  addEventListener: ReturnType<typeof vi.fn>;
+  removeEventListener: ReturnType<typeof vi.fn>;
+};
+let mockListeners: Record<string, (() => void)[]>;
+
+vi.stubGlobal(
+  'Audio',
+  class {
+    paused = true;
+    currentTime = 0;
+    duration = NaN;
+    src = '';
+    oncanplay: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    play = vi.fn(async () => {
+      this.paused = false;
+    });
+    pause = vi.fn(() => {
+      this.paused = true;
+    });
+    addEventListener = vi.fn((event: string, handler: () => void) => {
+      mockListeners[event] = mockListeners[event] ?? [];
+      mockListeners[event].push(handler);
+    });
+    removeEventListener = vi.fn();
+    constructor() {
+      mockAudio = this as unknown as typeof mockAudio;
+    }
+  }
+);
 
 describe('AudioEngine', () => {
   let engine: AudioEngine;
-  let mockCtx: AudioContext;
-  let mockBuffer: AudioBuffer;
 
   beforeEach(() => {
-    const mock = createMockAudioContext();
-    mockCtx = mock.ctx;
-    mockBuffer = mock.mockAudioBuffer;
-    engine = new AudioEngine(mockCtx);
+    mockListeners = {};
+    engine = new AudioEngine();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('initializes with default state', () => {
     expect(engine.isPlaying).toBe(false);
     expect(engine.currentTime).toBe(0);
     expect(engine.duration).toBe(0);
-    expect(engine.duration).toBe(0);
   });
 
-  it('loads an AudioBuffer and reports duration', async () => {
-    await engine.loadBuffer(mockBuffer);
-    expect(engine.duration).toBe(mockBuffer.duration);
+  it('loads a URL and waits for canplay', async () => {
+    const loadPromise = engine.loadUrl('blob:test');
+    mockAudio.duration = 180;
+    mockAudio.oncanplay!();
+    await loadPromise;
+    expect(mockAudio.src).toBe('blob:test');
+    expect(engine.duration).toBe(180);
     expect(engine.isPlaying).toBe(false);
   });
 
-  it('plays a loaded buffer', async () => {
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
+  it('plays after loading', async () => {
+    mockAudio.duration = 120;
+    const loadPromise = engine.loadUrl('blob:test');
+    mockAudio.oncanplay!();
+    await loadPromise;
+
+    await engine.play();
     expect(engine.isPlaying).toBe(true);
+    expect(mockAudio.play).toHaveBeenCalled();
   });
 
   it('pauses and reports correct currentTime', async () => {
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
-    (mockCtx as any)._advanceTime(5000);
+    mockAudio.duration = 120;
+    const loadPromise = engine.loadUrl('blob:test');
+    mockAudio.oncanplay!();
+    await loadPromise;
+
+    await engine.play();
+    mockAudio.currentTime = 5;
     engine.pause();
     expect(engine.isPlaying).toBe(false);
-    expect(engine.currentTime).toBeCloseTo(5, 1);
-  });
-
-  it('resumes from paused position', async () => {
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
-    (mockCtx as any)._advanceTime(3000);
-    engine.pause();
-    engine.play();
-    expect(engine.isPlaying).toBe(true);
+    expect(engine.currentTime).toBe(5);
   });
 
   it('seeks to a target position', async () => {
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
+    mockAudio.duration = 120;
+    const loadPromise = engine.loadUrl('blob:test');
+    mockAudio.oncanplay!();
+    await loadPromise;
+
+    await engine.play();
     engine.seek(60);
+    expect(mockAudio.currentTime).toBe(60);
     expect(engine.isPlaying).toBe(true);
   });
 
   it('stops playback completely', async () => {
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
+    mockAudio.duration = 120;
+    const loadPromise = engine.loadUrl('blob:test');
+    mockAudio.oncanplay!();
+    await loadPromise;
+
+    await engine.play();
     engine.stop();
     expect(engine.isPlaying).toBe(false);
     expect(engine.currentTime).toBe(0);
   });
 
-  it('calls onTrackEnd callback when playback finishes', async () => {
+  it('calls onTrackEnd callback when playback finishes', () => {
     const onEnd = vi.fn();
     engine.onTrackEnd = onEnd;
-    await engine.loadBuffer(mockBuffer);
-    engine.play();
-    const lastSource = (mockCtx as any).createBufferSource.mock.results.at(-1).value;
-    lastSource.onended();
+
+    const endedHandlers = mockListeners['ended'];
+    expect(endedHandlers).toHaveLength(1);
+    endedHandlers[0]();
     expect(onEnd).toHaveBeenCalledOnce();
   });
 });

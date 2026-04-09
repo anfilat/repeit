@@ -23,10 +23,9 @@ export class FileService {
     return false;
   }
 
-  async decodeAudioFile(handle: FileSystemFileHandle, audioContext: AudioContext): Promise<AudioBuffer> {
+  async createObjectUrl(handle: FileSystemFileHandle): Promise<string> {
     const file = await handle.getFile();
-    const arrayBuffer = await file.arrayBuffer();
-    return audioContext.decodeAudioData(arrayBuffer);
+    return URL.createObjectURL(file);
   }
 
   async getAudioDuration(handle: FileSystemFileHandle): Promise<number> {
