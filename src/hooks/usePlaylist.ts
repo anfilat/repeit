@@ -67,6 +67,14 @@ export function usePlaylist() {
     [sync]
   );
 
+  const addFolder = useCallback(
+    async (dirHandle: FileSystemDirectoryHandle) => {
+      const handles = await fileServiceRef.current.scanDirectory(dirHandle);
+      await addFiles(handles);
+    },
+    [addFiles]
+  );
+
   const clearPlaylist = useCallback(() => {
     managerRef.current.clear();
     sync();
@@ -203,6 +211,7 @@ export function usePlaylist() {
     state,
     currentTrack,
     addFiles,
+    addFolder,
     clearPlaylist,
     removeTrack,
     reorder,

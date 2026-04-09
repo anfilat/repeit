@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 
 interface PlaylistMenuProps {
   onAddFiles: () => void;
+  onAddFolder: () => void;
   onSort: () => void;
   onClear: () => void;
   hasTracks: boolean;
 }
 
-export function PlaylistMenu({ onAddFiles, onSort, onClear, hasTracks }: PlaylistMenuProps) {
+export function PlaylistMenu({ onAddFiles, onAddFolder, onSort, onClear, hasTracks }: PlaylistMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +48,12 @@ export function PlaylistMenu({ onAddFiles, onSort, onClear, hasTracks }: Playlis
             className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-white/5 transition-colors"
           >
             {'\uFF0B'} Add files
+          </button>
+          <button
+            onClick={() => handleAction(onAddFolder)}
+            className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-white/5 transition-colors"
+          >
+            {'\uD83D\uDCC2'} Add folder
           </button>
           <button
             onClick={() => handleAction(onSort)}

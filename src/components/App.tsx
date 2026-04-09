@@ -270,6 +270,15 @@ export function App() {
     }
   }, [handleAddFiles]);
 
+  const handleSelectFolder = useCallback(async () => {
+    try {
+      const dirHandle = await window.showDirectoryPicker();
+      playlist.addFolder(dirHandle);
+    } catch {
+      // user cancelled
+    }
+  }, [playlist]);
+
   return (
     <div className="flex flex-col overflow-hidden bg-gray-900 text-white" style={{ height: viewportHeight }}>
       {/* Restore access banner */}
@@ -358,6 +367,7 @@ export function App() {
           <div className="min-w-[60px] flex justify-end">
             <PlaylistMenu
               onAddFiles={handleSelectFiles}
+              onAddFolder={handleSelectFolder}
               onSort={handleSort}
               onClear={() => {
                 if (confirm('Clear all tracks?')) handleClearPlaylist();

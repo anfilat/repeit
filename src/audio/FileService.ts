@@ -1,3 +1,5 @@
+import { naturalCompare } from '../utils/naturalSort';
+
 const AUDIO_EXTENSIONS = ['.mp3', '.wav'];
 
 export class FileService {
@@ -21,6 +23,19 @@ export class FileService {
       return perm === 'granted';
     }
     return false;
+  }
+
+  async scanDirectory(dirHandle: FileSystemDirectoryHandle): Promise<FileSystemFileHandle[]> {
+    const audioHandles: FileSystemFileHandle[] = [];
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file') {
+        const fileHandle = entry as FileSystemFileHandle;
+        if (AUDIO_EXTENSIONS.some(ext => fileHandle.name.toLowerCase().endsWith(ext))) {
+          audioHandles.push(fileHandle);
+        }
+      }
+    }
+    return audioHandles.sort((a, b) => naturalCompare(a.name, b.name));
   }
 
   async createObjectUrl(handle: FileSystemFileHandle): Promise<string> {

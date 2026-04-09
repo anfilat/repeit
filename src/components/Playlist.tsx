@@ -39,7 +39,7 @@ export function Playlist({
   if (tracks.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
-        No tracks loaded. Select files to begin.
+        No tracks loaded. Select files or a folder to begin.
       </div>
     );
   }

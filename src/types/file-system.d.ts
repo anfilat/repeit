@@ -3,4 +3,5 @@ interface Window {
     multiple?: boolean;
     types?: Array<{ description?: string; accept: Record<string, string[]> }>;
   }): Promise<FileSystemFileHandle[]>;
+  showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
 }
