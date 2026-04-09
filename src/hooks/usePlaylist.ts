@@ -35,33 +35,34 @@ export function usePlaylist() {
       const uniqueHandles = audioHandles.filter(h => !existingNames.has(h.name));
       if (uniqueHandles.length === 0) return;
 
-      const ctx = new AudioContext();
-      const newTracks: Track[] = await Promise.all(
-        uniqueHandles.map(async handle => {
-          let duration = 0;
-          try {
-            const buffer = await fileServiceRef.current.decodeAudioFile(handle, ctx);
-            duration = buffer.duration;
-          } catch {
-            // skip duration if decode fails
-          }
-          return {
-            id: crypto.randomUUID(),
-            name: handle.name.replace(/\.[^.]+$/, ''),
-            duration,
-            handle,
-          };
-        })
-      );
-      ctx.close();
-
       const mgr = managerRef.current;
       const isFirstLoad = mgr.state.tracks.length === 0;
+
+      // Add tracks immediately with duration 0
+      const newTracks: Track[] = uniqueHandles.map(handle => ({
+        id: crypto.randomUUID(),
+        name: handle.name.replace(/\.[^.]+$/, ''),
+        duration: 0,
+        handle,
+      }));
       mgr.state.tracks = [...mgr.state.tracks, ...newTracks];
       if (isFirstLoad && autoSelect && mgr.state.tracks.length > 0) {
         mgr.state.currentIndex = 0;
       }
       sync();
+
+      // Load durations in background
+      for (const track of newTracks) {
+        try {
+          const duration = await fileServiceRef.current.getAudioDuration(track.handle);
+          if (duration > 0) {
+            track.duration = duration;
+            sync();
+          }
+        } catch {
+          // skip
+        }
+      }
     },
     [sync]
   );

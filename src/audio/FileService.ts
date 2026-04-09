@@ -28,4 +28,21 @@ export class FileService {
     const arrayBuffer = await file.arrayBuffer();
     return audioContext.decodeAudioData(arrayBuffer);
   }
+
+  async getAudioDuration(handle: FileSystemFileHandle): Promise<number> {
+    const file = await handle.getFile();
+    const url = URL.createObjectURL(file);
+    return new Promise(resolve => {
+      const audio = new Audio();
+      audio.addEventListener('loadedmetadata', () => {
+        URL.revokeObjectURL(url);
+        resolve(audio.duration || 0);
+      });
+      audio.addEventListener('error', () => {
+        URL.revokeObjectURL(url);
+        resolve(0);
+      });
+      audio.src = url;
+    });
+  }
 }
