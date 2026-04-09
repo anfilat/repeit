@@ -10,6 +10,8 @@ let mockAudio: {
   onerror: (() => void) | null;
   play: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
+  load: ReturnType<typeof vi.fn>;
+  removeAttribute: ReturnType<typeof vi.fn>;
   addEventListener: ReturnType<typeof vi.fn>;
   removeEventListener: ReturnType<typeof vi.fn>;
 };
@@ -29,6 +31,10 @@ vi.stubGlobal(
     });
     pause = vi.fn(() => {
       this.paused = true;
+    });
+    load = vi.fn();
+    removeAttribute = vi.fn((attr: string) => {
+      if (attr === 'src') this.src = '';
     });
     addEventListener = vi.fn((event: string, handler: () => void) => {
       mockListeners[event] = mockListeners[event] ?? [];

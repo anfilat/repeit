@@ -45,6 +45,11 @@ export class AudioEngine {
 
   stop(): void {
     this.audio.pause();
-    this.audio.currentTime = 0;
+    this.audio.removeAttribute('src');
+    this.audio.load();
+    if (this.url) {
+      URL.revokeObjectURL(this.url);
+      this.url = null;
+    }
   }
 }
