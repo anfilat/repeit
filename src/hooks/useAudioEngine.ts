@@ -123,14 +123,13 @@ export function useAudioEngine() {
 
   const stop = useCallback(() => {
     engineRef.current?.stop();
+    pendingBufferRef.current = null;
     stopTicking();
-    if (engineRef.current) {
-      setAudioState({
-        isPlaying: false,
-        currentTime: 0,
-        duration: engineRef.current.duration,
-      });
-    }
+    setAudioState({
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+    });
   }, [stopTicking]);
 
   const setOnTrackEnd = useCallback((callback: (() => void) | null) => {

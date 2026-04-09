@@ -77,13 +77,15 @@ export function App() {
   // When current track changes (from playlist navigation), load it
   const prevIndexRef = useRef(playlist.state.currentIndex);
   useEffect(() => {
-    if (playlist.state.currentIndex !== prevIndexRef.current && playlist.currentTrack) {
+    if (playlist.state.currentIndex !== prevIndexRef.current) {
       prevIndexRef.current = playlist.state.currentIndex;
-      playlist.savePlaybackState(STORAGE_KEY, {
-        currentIndex: playlist.state.currentIndex,
-        position: 0,
-      });
-      loadAndPlay(playlist.currentTrack);
+      if (playlist.currentTrack) {
+        playlist.savePlaybackState(STORAGE_KEY, {
+          currentIndex: playlist.state.currentIndex,
+          position: 0,
+        });
+        loadAndPlay(playlist.currentTrack);
+      }
     }
   }, [playlist.state.currentIndex, playlist.currentTrack, loadAndPlay, playlist]);
 
