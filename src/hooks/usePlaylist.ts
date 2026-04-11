@@ -207,9 +207,15 @@ export function usePlaylist() {
     [addFiles]
   );
 
+  const getTrack = useCallback((index: number): Track | undefined => {
+    const { tracks } = managerRef.current.state;
+    return index >= 0 && index < tracks.length ? tracks[index] : undefined;
+  }, []);
+
   return {
     state,
     currentTrack,
+    getTrack,
     addFiles,
     addFolder,
     clearPlaylist,

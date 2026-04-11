@@ -16,6 +16,7 @@ export function App() {
   const playlist = usePlaylist();
   const audio = useAudioEngine();
   const loadingRef = useRef(false);
+  const loadIdRef = useRef(0);
   const initialMountRef = useRef(true);
   const lastSaveRef = useRef(0);
   const seekAfterLoadRef = useRef<number | null>(null);
@@ -32,9 +33,25 @@ export function App() {
     async (track: Track, autoPlay = false) => {
       if (loadingRef.current) return;
       loadingRef.current = true;
+      const loadId = ++loadIdRef.current;
       try {
-        const url = await fileService.createObjectUrl(track.handle);
-        await audio.loadUrl(url);
+        // Try cached URL first (synchronous — preserves user gesture context)
+        const cachedUrl = fileService.getCachedUrl(track.handle);
+        if (cachedUrl) {
+          // Synchronous: set src + try play before any await (for Media Session gesture)
+          audio.setSrc(cachedUrl);
+          if (autoPlay) {
+            audio.play();
+          }
+          await audio.waitForReady();
+        } else {
+          // Fallback: async URL creation
+          const url = await fileService.createObjectUrl(track.handle);
+          if (loadId !== loadIdRef.current) return;
+          await audio.loadUrl(url);
+        }
+        if (loadId !== loadIdRef.current) return;
+
         const seekTo = seekAfterLoadRef.current;
         if (seekTo !== null) {
           audio.seek(seekTo);
@@ -47,13 +64,17 @@ export function App() {
             audio.syncState();
           }
         }
+
+        // Play after media is ready (handles auto-advance where sync play() may have failed)
         if (autoPlay) {
           audio.play();
         }
       } catch (err) {
         console.error('Failed to load track:', track.name, err);
       } finally {
-        loadingRef.current = false;
+        if (loadId === loadIdRef.current) {
+          loadingRef.current = false;
+        }
       }
     },
     [audio, playlist]
@@ -71,21 +92,6 @@ export function App() {
   useEffect(() => {
     audio.setOnTrackEnd(handleTrackEnd);
   }, [audio, handleTrackEnd]);
-
-  // When current track changes (from playlist navigation), load it
-  const prevIndexRef = useRef(playlist.state.currentIndex);
-  useEffect(() => {
-    if (playlist.state.currentIndex !== prevIndexRef.current) {
-      prevIndexRef.current = playlist.state.currentIndex;
-      if (playlist.currentTrack) {
-        playlist.savePlaybackState(STORAGE_KEY, {
-          currentIndex: playlist.state.currentIndex,
-          position: 0,
-        });
-        loadAndPlay(playlist.currentTrack);
-      }
-    }
-  }, [playlist.state.currentIndex, playlist.currentTrack, loadAndPlay, playlist]);
 
   // Throttled save of playback state (~1s during playback)
   useEffect(() => {
@@ -115,14 +121,12 @@ export function App() {
       try {
         await playlist.loadPlaylist(STORAGE_KEY);
         const saved = await playlist.loadPlaybackState(STORAGE_KEY);
-        if (saved && playlist.state.tracks.length > saved.currentIndex) {
-          seekAfterLoadRef.current = saved.position;
-          if (saved.currentIndex === playlist.state.currentIndex) {
-            // Index didn't change, track-change effect won't fire — load directly
-            const track = playlist.currentTrack;
-            if (track) loadAndPlay(track, false);
-          } else {
+        if (saved && saved.currentIndex >= 0) {
+          const track = playlist.getTrack(saved.currentIndex);
+          if (track) {
+            seekAfterLoadRef.current = saved.position;
             playlist.setCurrentIndex(saved.currentIndex);
+            loadAndPlay(track, false);
           }
         }
       } catch (err) {

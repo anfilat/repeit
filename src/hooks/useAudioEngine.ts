@@ -42,6 +42,24 @@ export function useAudioEngine() {
     });
   }, []);
 
+  const setSrc = useCallback((url: string) => {
+    engineRef.current.setSrc(url);
+    setAudioState({
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+    });
+  }, []);
+
+  const waitForReady = useCallback(async () => {
+    await engineRef.current.waitForReady();
+    setAudioState({
+      isPlaying: engineRef.current.isPlaying,
+      currentTime: engineRef.current.currentTime,
+      duration: engineRef.current.duration,
+    });
+  }, []);
+
   const play = useCallback(async () => {
     await engineRef.current.play();
     startTicking();
@@ -98,6 +116,8 @@ export function useAudioEngine() {
   return {
     audioState,
     loadUrl,
+    setSrc,
+    waitForReady,
     play,
     pause,
     seek,

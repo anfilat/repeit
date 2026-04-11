@@ -1,6 +1,5 @@
 export class AudioEngine {
   private audio: HTMLAudioElement;
-  private url: string | null = null;
   public onTrackEnd: (() => void) | null = null;
 
   constructor() {
@@ -20,15 +19,20 @@ export class AudioEngine {
     return this.audio.currentTime;
   }
 
-  async loadUrl(url: string): Promise<void> {
-    this.stop();
-    if (this.url) URL.revokeObjectURL(this.url);
-    this.url = url;
+  setSrc(url: string): void {
     this.audio.src = url;
+  }
+
+  async waitForReady(): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       this.audio.oncanplay = () => resolve();
       this.audio.onerror = () => reject(new Error('Failed to load audio'));
     });
+  }
+
+  async loadUrl(url: string): Promise<void> {
+    this.setSrc(url);
+    await this.waitForReady();
   }
 
   async play(): Promise<void> {
@@ -47,9 +51,5 @@ export class AudioEngine {
     this.audio.pause();
     this.audio.removeAttribute('src');
     this.audio.load();
-    if (this.url) {
-      URL.revokeObjectURL(this.url);
-      this.url = null;
-    }
   }
 }

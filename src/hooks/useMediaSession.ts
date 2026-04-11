@@ -76,10 +76,14 @@ export function useMediaSession({
 
     if (track) {
       ms.metadata = new MediaMetadata({ title: track.name });
+      // Proactively keep playback state active during track transition
+      if (isPlaying) {
+        ms.playbackState = 'playing';
+      }
     } else {
       ms.metadata = null;
     }
-  }, [track, supported]);
+  }, [track, isPlaying, supported]);
 
   // Update playback state
   useEffect(() => {
