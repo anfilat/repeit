@@ -22,13 +22,13 @@ jobs:
           fi
 
       # Build main
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main
           path: src-main
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: src-main/package-lock.json
       - run: npm ci && npm run build
@@ -36,7 +36,7 @@ jobs:
       - run: mv src-main/dist dist-main
 
       # Build beta (only if branch exists)
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: steps.beta.outputs.exists == 'true'
         with:
           ref: beta
