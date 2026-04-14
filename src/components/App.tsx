@@ -275,17 +275,17 @@ export function App() {
   }, [playlist]);
 
   return (
-    <div className="flex flex-col overflow-hidden bg-gray-900 text-white" style={{ height: viewportHeight }}>
+    <div className="flex flex-col overflow-hidden bg-gray-50 text-gray-900" style={{ height: viewportHeight }}>
       {/* Loading overlay */}
       {playlist.loadingState.isLoading && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 mx-4 min-w-[280px]">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 mx-4 min-w-[280px] shadow-lg">
             <p className="text-center mb-3 text-sm">
               Копирование файлов {playlist.loadingState.current}/{playlist.loadingState.total}
             </p>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-200"
+                className="bg-blue-600 h-2 rounded-full transition-all duration-200"
                 style={{
                   width: `${playlist.loadingState.total > 0 ? (playlist.loadingState.current / playlist.loadingState.total) * 100 : 0}%`,
                 }}
@@ -297,11 +297,11 @@ export function App() {
 
       {/* Missing files modal */}
       {missingFiles.length > 0 && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 mx-4 min-w-[280px] max-w-[400px]">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 mx-4 min-w-[280px] max-w-[400px] shadow-lg">
             <h2 className="text-lg font-semibold mb-3">Файлы не найдены</h2>
-            <p className="text-sm text-gray-300 mb-3">Следующие файлы отсутствуют:</p>
-            <ul className="text-sm text-gray-400 mb-4 max-h-40 overflow-y-auto">
+            <p className="text-sm text-gray-600 mb-3">Следующие файлы отсутствуют:</p>
+            <ul className="text-sm text-gray-500 mb-4 max-h-40 overflow-y-auto">
               {missingFiles.map(id => (
                 <li key={id}>• {id}</li>
               ))}
@@ -312,13 +312,13 @@ export function App() {
                   await handleClearPlaylist();
                   setMissingFiles([]);
                 }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
               >
                 Очистить плейлист
               </button>
               <button
                 onClick={() => setMissingFiles([])}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition-colors"
               >
                 ОК
               </button>
@@ -339,7 +339,7 @@ export function App() {
       />
 
       {/* Player bar */}
-      <footer className="border-t border-gray-800 px-4 py-3 flex flex-col gap-3">
+      <footer className="border-t border-gray-200 px-4 py-3 flex flex-col gap-3">
         <ProgressBar
           currentTime={audio.audioState.currentTime}
           duration={audio.audioState.duration}
@@ -350,7 +350,7 @@ export function App() {
           <div className="min-w-[60px]">
             <button
               onClick={cycleRepeat}
-              className={`p-2 rounded hover:bg-white/10 transition-colors ${playlist.state.repeat === 'off' ? 'text-gray-500' : 'text-blue-400'}`}
+              className={`p-2 rounded hover:bg-gray-100 transition-colors ${playlist.state.repeat === 'off' ? 'text-gray-400' : 'text-blue-600'}`}
               title={
                 playlist.state.repeat === 'off'
                   ? 'Repeat off'

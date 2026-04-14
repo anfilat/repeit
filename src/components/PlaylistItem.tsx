@@ -71,13 +71,13 @@ export function PlaylistItem({
       ref={ref}
       style={style}
       className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer group ${
-        isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-white/5'
+        isActive ? 'bg-blue-600/10 text-blue-700' : 'hover:bg-gray-100'
       }`}
       onDoubleClick={onSelect}
     >
       {!isTouchDevice && (
         <button
-          className="cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 px-1"
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 px-1"
           {...attributes}
           {...listeners}
         >
@@ -90,7 +90,7 @@ export function PlaylistItem({
         </button>
       )}
       <span className="flex-1 truncate text-sm">{track.name}</span>
-      <span className="text-xs text-gray-400">{formatDuration(track.duration)}</span>
+      <span className="text-xs text-gray-500">{formatDuration(track.duration)}</span>
       <TrackMenu
         onPlay={onSelect}
         onMoveUp={onMoveUp}

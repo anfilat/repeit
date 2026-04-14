@@ -8,7 +8,11 @@ interface PlayerControlsProps {
 export function PlayerControls({ isPlaying, onPlayPause, onNext, onPrev }: PlayerControlsProps) {
   return (
     <div className="flex items-center justify-center gap-4">
-      <button onClick={onPrev} className="p-2 rounded hover:bg-white/10 transition-colors text-white" title="Previous">
+      <button
+        onClick={onPrev}
+        className="p-2 rounded hover:bg-gray-100 transition-colors text-gray-700"
+        title="Previous"
+      >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <rect x="3" y="5" width="3" height="14" />
           <polygon points="21 5 10 12 21 19" />
@@ -17,7 +21,7 @@ export function PlayerControls({ isPlaying, onPlayPause, onNext, onPrev }: Playe
 
       <button
         onClick={onPlayPause}
-        className="p-3 rounded-full bg-white text-black hover:bg-gray-200 transition-colors"
+        className="p-3 rounded-full bg-gray-900 text-white hover:bg-gray-700 transition-colors"
         title={isPlaying ? 'Pause' : 'Play'}
       >
         {isPlaying ? (
@@ -32,7 +36,7 @@ export function PlayerControls({ isPlaying, onPlayPause, onNext, onPrev }: Playe
         )}
       </button>
 
-      <button onClick={onNext} className="p-2 rounded hover:bg-white/10 transition-colors text-white" title="Next">
+      <button onClick={onNext} className="p-2 rounded hover:bg-gray-100 transition-colors text-gray-700" title="Next">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <rect x="18" y="5" width="3" height="14" />
           <polygon points="3 5 14 12 3 19" />

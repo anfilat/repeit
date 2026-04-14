@@ -36,7 +36,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
           e.stopPropagation();
           setOpen(v => !v);
         }}
-        className="p-1 rounded hover:bg-white/10 transition-colors text-gray-500 hover:text-gray-300"
+        className="p-1 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <circle cx="8" cy="3" r="1.5" />
@@ -45,13 +45,13 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-gray-800 rounded-lg shadow-lg shadow-black/50 py-1 min-w-[180px] z-50">
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg shadow-gray-300/50 py-1 min-w-[180px] z-50 border border-gray-200">
           <button
             onClick={e => {
               e.stopPropagation();
               handleAction(onPlay);
             }}
-            className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-white/5 transition-colors"
+            className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-gray-100 transition-colors"
           >
             {'\u25B6'} Воспроизвести
           </button>
@@ -61,7 +61,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
               handleAction(onMoveUp);
             }}
             disabled={!canMoveUp}
-            className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             {'\u25B2'} Переместить вверх
           </button>
@@ -71,7 +71,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
               handleAction(onMoveDown);
             }}
             disabled={!canMoveDown}
-            className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             {'\u25BC'} Переместить вниз
           </button>
@@ -80,7 +80,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
               e.stopPropagation();
               handleAction(onDelete);
             }}
-            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-white/5 transition-colors"
+            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
           >
             {'\uD83D\uDDD1'} Удалить
           </button>

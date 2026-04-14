@@ -71,18 +71,18 @@ export function ProgressBar({ currentTime, duration, onSeek }: ProgressBarProps)
 
   return (
     <div className="flex items-center gap-3 w-full">
-      <span className="text-xs text-gray-400 w-10 text-right tabular-nums">{formatTime(displayTime)}</span>
+      <span className="text-xs text-gray-500 w-10 text-right tabular-nums">{formatTime(displayTime)}</span>
       <div
         ref={barRef}
         onClick={handleClick}
         onMouseDown={handleMouseDown}
-        className="flex-1 h-2 bg-gray-700 rounded-full cursor-pointer relative"
+        className="flex-1 h-2 bg-gray-200 rounded-full cursor-pointer relative"
       >
-        <div className="h-full bg-blue-500 rounded-full relative" style={{ width: `${progress}%` }}>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full translate-x-1/2" />
+        <div className="h-full bg-blue-600 rounded-full relative" style={{ width: `${progress}%` }}>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-900 rounded-full translate-x-1/2" />
         </div>
       </div>
-      <span className="text-xs text-gray-400 w-10 tabular-nums">{formatTime(duration)}</span>
+      <span className="text-xs text-gray-500 w-10 tabular-nums">{formatTime(duration)}</span>
     </div>
   );
 }
