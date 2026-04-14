@@ -3,11 +3,11 @@ import { PlaylistManager } from './PlaylistManager';
 import type { Track } from '../types';
 
 function createTrack(id: string): Track {
-  return { id, name: `${id}.mp3`, duration: 180, handle: { kind: 'file', name: `${id}.mp3` } as FileSystemFileHandle };
+  return { id, name: `${id}.mp3`, duration: 180, fileId: `file-${id}` };
 }
 
 function createTrackNamed(name: string): Track {
-  return { id: name, name, duration: 180, handle: { kind: 'file', name: `${name}.mp3` } as FileSystemFileHandle };
+  return { id: name, name, duration: 180, fileId: `file-${name}` };
 }
 
 describe('PlaylistManager', () => {

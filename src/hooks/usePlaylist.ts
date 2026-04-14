@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
-import type { Track, RepeatMode, PlaylistState } from '../types';
+import type { Track, RepeatMode, PlaylistState, LoadingState } from '../types';
 import { PlaylistManager } from '../state/PlaylistManager';
 import { FileService } from '../audio/FileService';
-import { StorageService } from '../state/StorageService';
+import { OpfsStorageService } from '../state/OpfsStorageService';
 import { naturalCompare } from '../utils/naturalSort';
 
 const REPEAT_STORAGE_KEY = 'repeit-repeat-mode';
@@ -18,9 +18,14 @@ export function usePlaylist() {
     }
   }
   const fileServiceRef = useRef(new FileService());
-  const storageServiceRef = useRef(new StorageService());
+  const storageRef = useRef(new OpfsStorageService());
 
   const [state, setState] = useState<PlaylistState>(managerRef.current.state);
+  const [loadingState, setLoadingState] = useState<LoadingState>({
+    isLoading: false,
+    current: 0,
+    total: 0,
+  });
 
   const sync = useCallback(() => {
     setState({ ...managerRef.current.state });
@@ -31,38 +36,38 @@ export function usePlaylist() {
       const audioHandles = fileServiceRef.current.filterAudioFiles(handles);
       if (audioHandles.length === 0) return;
 
-      const existingNames = new Set(managerRef.current.state.tracks.map(t => t.handle.name));
-      const uniqueHandles = audioHandles.filter(h => !existingNames.has(h.name));
-      if (uniqueHandles.length === 0) return;
+      setLoadingState({ isLoading: true, current: 0, total: audioHandles.length });
 
       const mgr = managerRef.current;
       const isFirstLoad = mgr.state.tracks.length === 0;
+      const newTracks: Track[] = [];
 
-      // Add tracks immediately with duration 0
-      const newTracks: Track[] = uniqueHandles.map(handle => ({
-        id: crypto.randomUUID(),
-        name: handle.name.replace(/\.[^.]+$/, ''),
-        duration: 0,
-        handle,
-      }));
-      mgr.state.tracks = [...mgr.state.tracks, ...newTracks];
-      if (isFirstLoad && autoSelect && mgr.state.tracks.length > 0) {
-        mgr.state.currentIndex = 0;
-      }
-      sync();
-
-      // Load durations in background
-      for (const track of newTracks) {
+      for (let i = 0; i < audioHandles.length; i++) {
         try {
-          const duration = await fileServiceRef.current.getAudioDuration(track.handle);
-          if (duration > 0) {
-            track.duration = duration;
-            sync();
+          const result = await storageRef.current.addFile(audioHandles[i]);
+          if (!result.duplicate) {
+            newTracks.push({
+              id: crypto.randomUUID(),
+              name: audioHandles[i].name.replace(/\.[^.]+$/, ''),
+              duration: result.duration,
+              fileId: result.fileId,
+            });
           }
-        } catch {
-          // skip
+        } catch (err) {
+          console.error('Failed to add file:', audioHandles[i].name, err);
         }
+        setLoadingState({ isLoading: true, current: i + 1, total: audioHandles.length });
       }
+
+      if (newTracks.length > 0) {
+        mgr.state.tracks = [...mgr.state.tracks, ...newTracks];
+        if (isFirstLoad && autoSelect && mgr.state.tracks.length > 0) {
+          mgr.state.currentIndex = 0;
+        }
+        sync();
+      }
+
+      setLoadingState({ isLoading: false, current: 0, total: 0 });
     },
     [sync]
   );
@@ -75,15 +80,24 @@ export function usePlaylist() {
     [addFiles]
   );
 
-  const clearPlaylist = useCallback(() => {
+  const clearPlaylist = useCallback(async () => {
     managerRef.current.clear();
     sync();
+    await storageRef.current.clearAll();
   }, [sync]);
 
   const removeTrack = useCallback(
-    (trackId: string) => {
+    async (trackId: string) => {
+      const track = managerRef.current.state.tracks.find(t => t.id === trackId);
       managerRef.current.removeTrack(trackId);
       sync();
+      if (track) {
+        try {
+          await storageRef.current.removeFile(track.fileId);
+        } catch (err) {
+          console.error('Failed to remove file:', err);
+        }
+      }
     },
     [sync]
   );
@@ -137,75 +151,68 @@ export function usePlaylist() {
   );
 
   const currentTrack = managerRef.current.currentTrack;
-  const pendingHandlesRef = useRef<FileSystemFileHandle[]>([]);
-  const [pendingHandlesCount, setPendingHandlesCount] = useState(0);
   const loadedRef = useRef(false);
 
-  const savePlaybackState = useCallback(
-    async (playlistId: string, state: { currentIndex: number; position: number }) => {
-      await storageServiceRef.current.savePlaybackState(playlistId, state);
-    },
-    []
-  );
-
-  const loadPlaybackState = useCallback(
-    async (playlistId: string): Promise<{ currentIndex: number; position: number } | null> => {
-      return storageServiceRef.current.loadPlaybackState(playlistId);
-    },
-    []
-  );
-
-  const savePlaylist = useCallback(async (playlistId: string) => {
-    const handles = managerRef.current.state.tracks.map(t => t.handle);
-    await storageServiceRef.current.saveHandles(playlistId, handles);
+  const savePlaybackState = useCallback(async (playbackState: { currentIndex: number; position: number }) => {
+    await storageRef.current.savePlaybackState(playbackState);
   }, []);
 
-  const loadPlaylist = useCallback(
-    async (playlistId: string) => {
-      if (loadedRef.current) return;
-      loadedRef.current = true;
+  const loadPlaybackState = useCallback(async (): Promise<{
+    currentIndex: number;
+    position: number;
+  } | null> => {
+    return storageRef.current.loadPlaybackState();
+  }, []);
 
-      const handles = await storageServiceRef.current.loadHandles(playlistId);
-      if (handles.length === 0) return;
+  const savePlaylist = useCallback(async () => {
+    const fileIds = managerRef.current.state.tracks.map(t => t.fileId);
+    await storageRef.current.savePlaylist(fileIds);
+  }, []);
 
-      const granted: FileSystemFileHandle[] = [];
-      const pending: FileSystemFileHandle[] = [];
-      for (const handle of handles) {
-        const ok = await fileServiceRef.current.checkPermission(handle);
-        if (ok) granted.push(handle);
-        else pending.push(handle);
-      }
-      if (granted.length > 0) {
-        await addFiles(granted, false);
-      }
-      if (pending.length > 0) {
-        pendingHandlesRef.current = pending;
-        setPendingHandlesCount(pending.length);
-      }
-    },
-    [addFiles]
-  );
+  const loadPlaylist = useCallback(async (): Promise<{ missingFiles: string[] }> => {
+    if (loadedRef.current) return { missingFiles: [] };
+    loadedRef.current = true;
 
-  const restorePlaylist = useCallback(
-    async (playlistId: string) => {
-      const handles = pendingHandlesRef.current;
-      if (handles.length === 0) return;
-      const granted: FileSystemFileHandle[] = [];
-      for (const handle of handles) {
-        const ok = await fileServiceRef.current.requestPermission(handle);
-        if (ok) granted.push(handle);
+    const fileIds = await storageRef.current.loadPlaylist();
+    if (fileIds.length === 0) return { missingFiles: [] };
+
+    const tracks: Track[] = [];
+    const missingFiles: string[] = [];
+
+    for (const fileId of fileIds) {
+      const meta = await storageRef.current.getMetadata(fileId);
+      if (meta) {
+        tracks.push({
+          id: crypto.randomUUID(),
+          name: meta.originalName.replace(/\.[^.]+$/, ''),
+          duration: meta.duration,
+          fileId: meta.fileId,
+        });
+      } else {
+        missingFiles.push(fileId);
       }
-      if (granted.length > 0) {
-        await addFiles(granted);
-      }
-      pendingHandlesRef.current = [];
-      setPendingHandlesCount(0);
-      // Re-save with all now-granted handles
-      const allHandles = managerRef.current.state.tracks.map(t => t.handle);
-      await storageServiceRef.current.saveHandles(playlistId, allHandles);
-    },
-    [addFiles]
-  );
+    }
+
+    if (tracks.length > 0) {
+      const mgr = managerRef.current;
+      mgr.state.tracks = tracks;
+      mgr.state.currentIndex = 0;
+      sync();
+
+      // Pre-populate URL cache for Android track transitions
+      await storageRef.current.preloadUrls(tracks.map(t => t.fileId));
+    }
+
+    return { missingFiles };
+  }, [sync]);
+
+  const getObjectUrl = useCallback(async (fileId: string): Promise<string> => {
+    return storageRef.current.getObjectUrl(fileId);
+  }, []);
+
+  const getCachedUrl = useCallback((fileId: string): string | null => {
+    return storageRef.current.getCachedUrl(fileId);
+  }, []);
 
   const getTrack = useCallback((index: number): Track | undefined => {
     const { tracks } = managerRef.current.state;
@@ -231,7 +238,8 @@ export function usePlaylist() {
     savePlaybackState,
     loadPlaybackState,
     loadPlaylist,
-    restorePlaylist,
-    pendingHandlesCount,
+    getObjectUrl,
+    getCachedUrl,
+    loadingState,
   };
 }

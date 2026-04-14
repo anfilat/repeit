@@ -2,14 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { FileService } from './FileService';
 
 function createMockFileHandle(name: string): FileSystemFileHandle {
-  const file = new File([], name, { type: 'audio/mpeg' });
   return {
     kind: 'file',
     name,
-    getFile: vi.fn().mockResolvedValue(file),
+    getFile: vi.fn().mockResolvedValue(new File([], name, { type: 'audio/mpeg' })),
     isSameEntry: vi.fn(),
-    queryPermission: vi.fn().mockResolvedValue('granted'),
-    requestPermission: vi.fn().mockResolvedValue('granted'),
   } as unknown as FileSystemFileHandle;
 }
 
@@ -43,11 +40,6 @@ describe('FileService', () => {
     expect(result.map(h => h.name)).toEqual(['song.mp3', 'song.wav']);
   });
 
-  it('requests permission and returns true if granted', async () => {
-    const handle = createMockFileHandle('test.mp3');
-    expect(await fileService.requestPermission(handle)).toBe(true);
-  });
-
   it('scans directory for audio files sorted by name', async () => {
     const mp3 = createMockFileHandle('track10.mp3');
     const wav = createMockFileHandle('track2.wav');
@@ -64,11 +56,5 @@ describe('FileService', () => {
     const result = await fileService.scanDirectory(dirHandle);
     expect(result).toHaveLength(3);
     expect(result.map(h => h.name)).toEqual(['track1.mp3', 'track2.wav', 'track10.mp3']);
-  });
-
-  it('creates an object URL from a file handle', async () => {
-    const handle = createMockFileHandle('test.mp3');
-    const url = await fileService.createObjectUrl(handle);
-    expect(url).toMatch(/^blob:/);
   });
 });

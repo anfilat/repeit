@@ -6,11 +6,7 @@ import { Playlist } from './Playlist';
 import { PlayerControls } from './PlayerControls';
 import { PlaylistMenu } from './PlaylistMenu';
 import { ProgressBar } from './ProgressBar';
-import { FileService } from '../audio/FileService';
 import type { Track, RepeatMode } from '../types';
-
-const STORAGE_KEY = 'default-playlist';
-const fileService = new FileService();
 
 export function App() {
   const playlist = usePlaylist();
@@ -21,6 +17,7 @@ export function App() {
   const lastSaveRef = useRef(0);
   const seekAfterLoadRef = useRef<number | null>(null);
   const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
+  const [missingFiles, setMissingFiles] = useState<string[]>([]);
 
   useEffect(() => {
     const onResize = () => setViewportHeight(window.innerHeight);
@@ -35,18 +32,15 @@ export function App() {
       loadingRef.current = true;
       const loadId = ++loadIdRef.current;
       try {
-        // Try cached URL first (synchronous — preserves user gesture context)
-        const cachedUrl = fileService.getCachedUrl(track.handle);
+        const cachedUrl = playlist.getCachedUrl(track.fileId);
         if (cachedUrl) {
-          // Synchronous: set src + try play before any await (for Media Session gesture)
           audio.setSrc(cachedUrl);
           if (autoPlay) {
             audio.play();
           }
           await audio.waitForReady();
         } else {
-          // Fallback: async URL creation
-          const url = await fileService.createObjectUrl(track.handle);
+          const url = await playlist.getObjectUrl(track.fileId);
           if (loadId !== loadIdRef.current) return;
           await audio.loadUrl(url);
         }
@@ -56,7 +50,7 @@ export function App() {
         if (seekTo !== null) {
           audio.seek(seekTo);
           seekAfterLoadRef.current = null;
-          playlist.savePlaybackState(STORAGE_KEY, {
+          playlist.savePlaybackState({
             currentIndex: playlist.state.currentIndex,
             position: seekTo,
           });
@@ -65,7 +59,6 @@ export function App() {
           }
         }
 
-        // Play after media is ready (handles auto-advance where sync play() may have failed)
         if (autoPlay) {
           audio.play();
         }
@@ -99,28 +92,30 @@ export function App() {
     const now = Date.now();
     if (now - lastSaveRef.current < 1000) return;
     lastSaveRef.current = now;
-    playlist.savePlaybackState(STORAGE_KEY, {
+    playlist.savePlaybackState({
       currentIndex: playlist.state.currentIndex,
       position: audio.audioState.currentTime,
     });
   }, [audio.audioState, playlist.state.currentIndex, playlist]);
 
-  // Save playlist handles when tracks change (skip initial mount to avoid
-  // overwriting persisted data before loadPlaylist runs)
+  // Save playlist when tracks change (skip initial mount)
   useEffect(() => {
     if (initialMountRef.current) {
       initialMountRef.current = false;
       return;
     }
-    playlist.savePlaylist(STORAGE_KEY);
+    playlist.savePlaylist();
   }, [playlist.state.tracks, playlist]);
 
   // Load persisted playlist and restore playback state on mount
   useEffect(() => {
     const restore = async () => {
       try {
-        await playlist.loadPlaylist(STORAGE_KEY);
-        const saved = await playlist.loadPlaybackState(STORAGE_KEY);
+        const { missingFiles: missing } = await playlist.loadPlaylist();
+        if (missing.length > 0) {
+          setMissingFiles(missing);
+        }
+        const saved = await playlist.loadPlaybackState();
         if (saved && saved.currentIndex >= 0) {
           const track = playlist.getTrack(saved.currentIndex);
           if (track) {
@@ -140,7 +135,7 @@ export function App() {
   const handleSeek = useCallback(
     (time: number) => {
       audio.seek(time);
-      playlist.savePlaybackState(STORAGE_KEY, {
+      playlist.savePlaybackState({
         currentIndex: playlist.state.currentIndex,
         position: time,
       });
@@ -151,7 +146,7 @@ export function App() {
   const handlePlayPause = useCallback(() => {
     if (audio.audioState.isPlaying) {
       audio.pause();
-      playlist.savePlaybackState(STORAGE_KEY, {
+      playlist.savePlaybackState({
         currentIndex: playlist.state.currentIndex,
         position: audio.audioState.currentTime,
       });
@@ -205,19 +200,15 @@ export function App() {
   );
 
   const handleRemoveTrack = useCallback(
-    (trackId: string) => {
+    async (trackId: string) => {
       const wasPlaying = playlist.state.tracks[playlist.state.currentIndex]?.id === trackId;
-      playlist.removeTrack(trackId);
+      await playlist.removeTrack(trackId);
       if (wasPlaying) {
         audio.stop();
       }
     },
     [playlist, audio]
   );
-
-  const handleRestore = useCallback(() => {
-    playlist.restorePlaylist(STORAGE_KEY);
-  }, [playlist]);
 
   const handleReorder = useCallback(
     (fromIndex: number, toIndex: number) => {
@@ -240,9 +231,9 @@ export function App() {
     [playlist]
   );
 
-  const handleClearPlaylist = useCallback(() => {
+  const handleClearPlaylist = useCallback(async () => {
     audio.stop();
-    playlist.clearPlaylist();
+    await playlist.clearPlaylist();
   }, [audio, playlist]);
 
   const handleSort = useCallback(() => {
@@ -285,16 +276,54 @@ export function App() {
 
   return (
     <div className="flex flex-col overflow-hidden bg-gray-900 text-white" style={{ height: viewportHeight }}>
-      {/* Restore access banner */}
-      {playlist.pendingHandlesCount > 0 && (
-        <div className="px-4 py-2 bg-yellow-900/50 border-b border-yellow-700/50 flex items-center justify-between">
-          <span className="text-yellow-200 text-sm">{playlist.pendingHandlesCount} file(s) need access permission</span>
-          <button
-            onClick={handleRestore}
-            className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-sm font-medium transition-colors"
-          >
-            Restore access
-          </button>
+      {/* Loading overlay */}
+      {playlist.loadingState.isLoading && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 mx-4 min-w-[280px]">
+            <p className="text-center mb-3 text-sm">
+              Копирование файлов {playlist.loadingState.current}/{playlist.loadingState.total}
+            </p>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full transition-all duration-200"
+                style={{
+                  width: `${playlist.loadingState.total > 0 ? (playlist.loadingState.current / playlist.loadingState.total) * 100 : 0}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Missing files modal */}
+      {missingFiles.length > 0 && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 mx-4 min-w-[280px] max-w-[400px]">
+            <h2 className="text-lg font-semibold mb-3">Файлы не найдены</h2>
+            <p className="text-sm text-gray-300 mb-3">Следующие файлы отсутствуют:</p>
+            <ul className="text-sm text-gray-400 mb-4 max-h-40 overflow-y-auto">
+              {missingFiles.map(id => (
+                <li key={id}>• {id}</li>
+              ))}
+            </ul>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={async () => {
+                  await handleClearPlaylist();
+                  setMissingFiles([]);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors"
+              >
+                Очистить плейлист
+              </button>
+              <button
+                onClick={() => setMissingFiles([])}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition-colors"
+              >
+                ОК
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
