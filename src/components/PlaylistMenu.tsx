@@ -55,34 +55,34 @@ export function PlaylistMenu({
             onClick={() => handleAction(onAddFiles)}
             className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-gray-100 transition-colors"
           >
-            {'\uFF0B'} Add files
+            <span className="inline-block w-5 text-center">{'\uFF0B'}</span> Add files
           </button>
           <button
             onClick={() => handleAction(onAddFolder)}
             className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-gray-100 transition-colors"
           >
-            {'\uD83D\uDCC2'} Add folder
+            <span className="inline-block w-5 text-center">{'\uD83D\uDCC2'}</span> Add folder
           </button>
           <button
             onClick={() => handleAction(onSort)}
             disabled={!hasTracks}
             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
-            {'\u2195'} Sort
+            <span className="inline-block w-5 text-center">{'\u2195'}</span> Sort
           </button>
           <button
             onClick={() => handleAction(onClear)}
             disabled={!hasTracks}
             className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
-            {'\uD83D\uDDD1'} Clear all
+            <span className="inline-block w-5 text-center">{'\uD83D\uDDD1'}</span> Clear all
           </button>
           <div className="border-t border-gray-200 my-1" />
           <button
             onClick={() => handleAction(onSetRepeatCount)}
             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            {'\uD83D\uDD00'} Repeat count
+            <span className="inline-block w-5 text-center">{'\uD83D\uDD00'}</span> Repeat count
           </button>
         </div>
       )}
