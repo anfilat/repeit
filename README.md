@@ -9,7 +9,8 @@ Works on desktop and mobile right in the browser — no local setup needed.
 ## Features
 
 - **Local playback** — audio files stay on your device, decoded in-browser
-- **Playlist management** — add files, reorder by drag-and-drop, repeat modes (off / all / one)
+- **Playlist management** — add files, reorder by drag-and-drop, repeat modes (off / all / one / Nx)
+- **Nx repeat mode** — repeat each track a custom number of times before moving on. Set the count via the playlist menu with presets (5, 10, 20, 30) or a custom value. Designed for language learning: load your listening exercises, set a repeat count, and hear each recording multiple times to train comprehension before advancing to the next one.
 - **Session persistence** — playlist restores on reload
 - **PWA** — installable as a standalone app
 

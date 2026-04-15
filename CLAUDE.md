@@ -31,17 +31,17 @@ Audio player PWA. Files are copied into OPFS (Origin Private File System) on add
 1. **Services** (`src/audio/`, `src/state/`) — Pure logic classes, no React:
    - `AudioEngine` — HTMLAudioElement wrapper. Methods: `setSrc`/`loadUrl`/`waitForReady`, `play`/`pause`/`seek`/`stop`. Fires `onTrackEnd` callback.
    - `FileService` — Filters audio files by extension (.mp3/.wav) and scans directories (File System Access API). Returns sorted `FileSystemFileHandle[]`.
-   - `PlaylistManager` — Mutable state: track list, current index, repeat mode (off/all/one), reorder, remove, sort.
+   - `PlaylistManager` — Mutable state: track list, current index, repeat mode (off/all/one/Nx), repeat count (default 20), play counter for Nx mode, reorder, remove, sort.
    - `OpfsStorageService` — OPFS for audio file storage + IndexedDB for metadata/playlist/playback state. Hash-based deduplication (SHA-256). Manages object URL cache for playback. Key stores: `files` (file metadata), `playlist` (ordered file IDs), `playback-state` (current index + position).
 
 2. **Hooks** (`src/hooks/`) — React bridge layer:
-   - `usePlaylist` — Wraps PlaylistManager + FileService + OpfsStorageService. Handles file→Track conversion, loading progress state, playlist/playback persistence, object URL access. Syncs manager state to React via `useState`.
+   - `usePlaylist` — Wraps PlaylistManager + FileService + OpfsStorageService. Handles file→Track conversion, loading progress state, playlist/playback persistence (repeat mode + repeat count to localStorage), object URL access. Syncs manager state to React via `useState`.
    - `useAudioEngine` — Wraps AudioEngine. Syncs playback state to React via `requestAnimationFrame` tick during playback. Two load paths: `setSrc`+`waitForReady` (cached URL) vs `loadUrl` (uncached).
    - `useMediaSession` — Integrates with the Media Session API for OS-level playback controls (lock screen, notification bar, keyboard media keys). Sets track metadata, playback state, and position state (throttled to 1s) for seek bar. Uses refs for action handlers to avoid re-registering on every render.
 
-3. **Components** (`src/components/`) — UI with Tailwind CSS + dnd-kit for drag-and-drop reordering. `App.tsx` (in `src/components/`) wires hooks together: auto-loads track on index change, auto-advances on track end, throttled playback state save, playlist persistence on track changes, missing file detection on restore.
+3. **Components** (`src/components/`) — UI with Tailwind CSS + dnd-kit for drag-and-drop reordering. `App.tsx` (in `src/components/`) wires hooks together: auto-loads track on index change, auto-advances on track end (Nx mode replays current track N times before advancing), throttled playback state save, playlist persistence on track changes, missing file detection on restore. `RepeatCountModal` opened from `PlaylistMenu` sets the Nx repeat count with presets and custom input.
 
-**Core types** in `src/types.ts`: `Track` (has `fileId` referencing OPFS), `RepeatMode` (`off`/`all`/`one`), `PlaylistState`, `AudioState`, `FileMetadata`, `AddFileResult`, `LoadingState`.
+**Core types** in `src/types.ts`: `Track` (has `fileId` referencing OPFS), `RepeatMode` (`off`/`all`/`one`/`Nx`), `PlaylistState` (includes `repeatCount`), `AudioState`, `FileMetadata`, `AddFileResult`, `LoadingState`.
 
 **Key constraint:** Audio playback requires user gesture to start (Chrome autoplay policy).
 
