@@ -124,6 +124,69 @@ describe('PlaylistManager', () => {
       expect(pm.autoAdvance()).toEqual(tracks[0]);
       expect(pm.state.currentIndex).toBe(0);
     });
+
+    describe('with repeat Nx', () => {
+      it('repeats current track N times then advances', () => {
+        const pm = new PlaylistManager();
+        pm.setTracks(tracks);
+        pm.setRepeatCount(3);
+        pm.setRepeat('Nx');
+
+        // Play 1 is the first play, autoAdvance returns same track for plays 2 and 3
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1 -> < 3, repeat
+        expect(pm.state.currentIndex).toBe(0);
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 2 -> < 3, repeat
+        expect(pm.state.currentIndex).toBe(0);
+        expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount 3 -> >= 3, advance
+        expect(pm.state.currentIndex).toBe(1);
+      });
+
+      it('wraps to first track after N repeats at end of playlist', () => {
+        const pm = new PlaylistManager();
+        pm.setTracks(tracks);
+        pm.setRepeatCount(2);
+        pm.setRepeat('Nx');
+        pm.setCurrentIndex(2); // last track
+
+        expect(pm.autoAdvance()).toEqual(tracks[2]); // playCount 1 -> < 2, repeat
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 2 -> >= 2, wraps
+        expect(pm.state.currentIndex).toBe(0);
+      });
+
+      it('resets playCount on manual track change', () => {
+        const pm = new PlaylistManager();
+        pm.setTracks(tracks);
+        pm.setRepeatCount(3);
+        pm.setRepeat('Nx');
+
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1
+        pm.setCurrentIndex(1); // manual change resets playCount
+        expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount 1 again
+      });
+
+      it('resets playCount on repeat mode change', () => {
+        const pm = new PlaylistManager();
+        pm.setTracks(tracks);
+        pm.setRepeatCount(3);
+        pm.setRepeat('Nx');
+
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1
+        pm.setRepeat('off');
+        pm.setRepeat('Nx');
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1 again
+      });
+
+      it('resets playCount on repeatCount change', () => {
+        const pm = new PlaylistManager();
+        pm.setTracks(tracks);
+        pm.setRepeatCount(3);
+        pm.setRepeat('Nx');
+
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1
+        pm.setRepeatCount(5);
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1 again
+      });
+    });
   });
 
   describe('sort', () => {

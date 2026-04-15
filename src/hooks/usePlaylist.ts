@@ -6,6 +6,7 @@ import { OpfsStorageService } from '../state/OpfsStorageService';
 import { naturalCompare } from '../utils/naturalSort';
 
 const REPEAT_STORAGE_KEY = 'repeit-repeat-mode';
+const REPEAT_COUNT_STORAGE_KEY = 'repeit-repeat-count';
 
 export function usePlaylist() {
   const managerRef = useRef(new PlaylistManager());
@@ -13,8 +14,13 @@ export function usePlaylist() {
   if (!repeatRestoredRef.current) {
     repeatRestoredRef.current = true;
     const saved = localStorage.getItem(REPEAT_STORAGE_KEY);
-    if (saved === 'off' || saved === 'all' || saved === 'one') {
+    if (saved === 'off' || saved === 'all' || saved === 'one' || saved === 'Nx') {
       managerRef.current.setRepeat(saved);
+    }
+    const savedCount = localStorage.getItem(REPEAT_COUNT_STORAGE_KEY);
+    if (savedCount) {
+      const count = parseInt(savedCount, 10);
+      if (count > 0) managerRef.current.setRepeatCount(count);
     }
   }
   const fileServiceRef = useRef(new FileService());
@@ -150,6 +156,15 @@ export function usePlaylist() {
     [sync]
   );
 
+  const setRepeatCount = useCallback(
+    (count: number) => {
+      managerRef.current.setRepeatCount(count);
+      localStorage.setItem(REPEAT_COUNT_STORAGE_KEY, String(count));
+      sync();
+    },
+    [sync]
+  );
+
   const currentTrack = managerRef.current.currentTrack;
   const loadedRef = useRef(false);
 
@@ -234,6 +249,7 @@ export function usePlaylist() {
     autoAdvance,
     setCurrentIndex,
     setRepeat,
+    setRepeatCount,
     savePlaylist,
     savePlaybackState,
     loadPlaybackState,

@@ -5,10 +5,18 @@ interface PlaylistMenuProps {
   onAddFolder: () => void;
   onSort: () => void;
   onClear: () => void;
+  onSetRepeatCount: () => void;
   hasTracks: boolean;
 }
 
-export function PlaylistMenu({ onAddFiles, onAddFolder, onSort, onClear, hasTracks }: PlaylistMenuProps) {
+export function PlaylistMenu({
+  onAddFiles,
+  onAddFolder,
+  onSort,
+  onClear,
+  onSetRepeatCount,
+  hasTracks,
+}: PlaylistMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -62,14 +70,20 @@ export function PlaylistMenu({ onAddFiles, onAddFolder, onSort, onClear, hasTrac
           >
             {'\u2195'} Sort
           </button>
-          {hasTracks && (
-            <button
-              onClick={() => handleAction(onClear)}
-              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
-            >
-              {'\uD83D\uDDD1'} Clear all
-            </button>
-          )}
+          <button
+            onClick={() => handleAction(onClear)}
+            disabled={!hasTracks}
+            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+          >
+            {'\uD83D\uDDD1'} Clear all
+          </button>
+          <div className="border-t border-gray-200 my-1" />
+          <button
+            onClick={() => handleAction(onSetRepeatCount)}
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            {'\uD83D\uDD00'} Repeat count
+          </button>
         </div>
       )}
     </div>

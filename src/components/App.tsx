@@ -6,6 +6,7 @@ import { Playlist } from './Playlist';
 import { PlayerControls } from './PlayerControls';
 import { PlaylistMenu } from './PlaylistMenu';
 import { ProgressBar } from './ProgressBar';
+import { RepeatCountModal } from './RepeatCountModal';
 import type { Track, RepeatMode } from '../types';
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
   const seekAfterLoadRef = useRef<number | null>(null);
   const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
   const [missingFiles, setMissingFiles] = useState<string[]>([]);
+  const [showRepeatCountModal, setShowRepeatCountModal] = useState(false);
 
   useEffect(() => {
     const onResize = () => setViewportHeight(window.innerHeight);
@@ -176,7 +178,7 @@ export function App() {
   }, [playlist, audio, loadAndPlay]);
 
   const cycleRepeat = useCallback(() => {
-    const order: RepeatMode[] = ['off', 'all', 'one'];
+    const order: RepeatMode[] = ['off', 'all', 'one', 'Nx'];
     const current = order.indexOf(playlist.state.repeat);
     playlist.setRepeat(order[(current + 1) % order.length]);
   }, [playlist]);
@@ -356,7 +358,9 @@ export function App() {
                   ? 'Repeat off'
                   : playlist.state.repeat === 'all'
                     ? 'Repeat all'
-                    : 'Repeat one'
+                    : playlist.state.repeat === 'one'
+                      ? 'Repeat one'
+                      : `Repeat ${playlist.state.repeatCount}x`
               }
             >
               {playlist.state.repeat === 'one' ? (
@@ -365,16 +369,26 @@ export function App() {
                   <path d="M4 8V6a3.5 3.5 0 0 1 3.5-3.5H17" />
                   <polyline points="9 19.5 6.5 21.5 9 23.5" />
                   <path d="M20 16v2a3.5 3.5 0 0 1-3.5 3.5H7" />
+                  <text x="12" y="16" fontSize="10" fill="currentColor" stroke="none" textAnchor="middle">
+                    {'\u221E'}
+                  </text>
+                </svg>
+              ) : playlist.state.repeat === 'Nx' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 0.5 17.5 2.5 15 4.5" />
+                  <path d="M4 8V6a3.5 3.5 0 0 1 3.5-3.5H17" />
+                  <polyline points="9 19.5 6.5 21.5 9 23.5" />
+                  <path d="M20 16v2a3.5 3.5 0 0 1-3.5 3.5H7" />
                   <text
                     x="12"
                     y="15.5"
-                    fontSize="9"
+                    fontSize={playlist.state.repeatCount >= 10 ? '7' : '9'}
                     fill="currentColor"
                     stroke="none"
                     textAnchor="middle"
                     fontWeight="bold"
                   >
-                    1
+                    {playlist.state.repeatCount}
                   </text>
                 </svg>
               ) : (
@@ -405,11 +419,23 @@ export function App() {
               onClear={() => {
                 if (confirm('Clear all tracks?')) handleClearPlaylist();
               }}
+              onSetRepeatCount={() => setShowRepeatCountModal(true)}
               hasTracks={playlist.state.tracks.length > 0}
             />
           </div>
         </div>
       </footer>
+
+      {showRepeatCountModal && (
+        <RepeatCountModal
+          count={playlist.state.repeatCount}
+          onConfirm={count => {
+            playlist.setRepeatCount(count);
+            setShowRepeatCountModal(false);
+          }}
+          onClose={() => setShowRepeatCountModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -5,12 +5,13 @@ export interface Track {
   fileId: string;
 }
 
-export type RepeatMode = 'off' | 'all' | 'one';
+export type RepeatMode = 'off' | 'all' | 'one' | 'Nx';
 
 export interface PlaylistState {
   tracks: Track[];
   currentIndex: number;
   repeat: RepeatMode;
+  repeatCount: number;
 }
 
 export interface AudioState {

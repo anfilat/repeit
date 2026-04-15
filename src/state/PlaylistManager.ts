@@ -1,7 +1,8 @@
 import type { Track, RepeatMode, PlaylistState } from '../types';
 
 export class PlaylistManager {
-  public state: PlaylistState = { tracks: [], currentIndex: -1, repeat: 'off' };
+  public state: PlaylistState = { tracks: [], currentIndex: -1, repeat: 'off', repeatCount: 20 };
+  private playCount = 0;
 
   get currentTrack(): Track | undefined {
     const { currentIndex, tracks } = this.state;
@@ -15,10 +16,17 @@ export class PlaylistManager {
 
   setRepeat(mode: RepeatMode): void {
     this.state.repeat = mode;
+    this.playCount = 0;
+  }
+
+  setRepeatCount(count: number): void {
+    this.state.repeatCount = count;
+    this.playCount = 0;
   }
 
   setCurrentIndex(index: number): void {
     this.state.currentIndex = Math.max(0, Math.min(index, this.state.tracks.length - 1));
+    this.playCount = 0;
   }
 
   next(): Track | null {
@@ -38,12 +46,17 @@ export class PlaylistManager {
   }
 
   autoAdvance(): Track | null {
-    const { tracks, currentIndex, repeat } = this.state;
+    const { tracks, currentIndex, repeat, repeatCount } = this.state;
     if (tracks.length === 0) return null;
     if (repeat === 'one') return tracks[currentIndex] ?? null;
+    if (repeat === 'Nx') {
+      this.playCount++;
+      if (this.playCount < repeatCount) return tracks[currentIndex] ?? null;
+      this.playCount = 0;
+    }
     const nextIndex = currentIndex + 1;
     if (nextIndex >= tracks.length) {
-      if (repeat === 'all') {
+      if (repeat === 'all' || repeat === 'Nx') {
         this.state.currentIndex = 0;
         return tracks[0];
       }
