@@ -21,8 +21,8 @@ export default defineConfig({
         name: isBeta ? 'Repeit Beta' : 'Repeit',
         short_name: isBeta ? 'Repeit Beta' : 'Repeit',
         description: 'Audio player PWA',
-        theme_color: isBeta ? '#ebeb50' : '#1e293b',
-        background_color: isBeta ? '#ebeb50' : '#0f172a',
+        theme_color: isBeta ? '#ebeb50' : '#f9fafb',
+        background_color: isBeta ? '#ebeb50' : '#f9fafb',
         display: 'standalone',
         icons: [
           { src: 'pwa-192x192.svg', sizes: '192x192', type: 'image/svg+xml' },
