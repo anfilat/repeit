@@ -6,6 +6,7 @@ import { Playlist } from './Playlist';
 import { PlayerControls } from './PlayerControls';
 import { PlaylistMenu } from './PlaylistMenu';
 import { ProgressBar } from './ProgressBar';
+import { RepeatButton } from './RepeatButton';
 import { RepeatCountModal } from './RepeatCountModal';
 import type { Track, RepeatMode } from '../types';
 
@@ -350,56 +351,11 @@ export function App() {
         <div className="flex items-center justify-between">
           {/* Left: repeat */}
           <div className="min-w-[60px]">
-            <button
+            <RepeatButton
+              repeat={playlist.state.repeat}
+              repeatCount={playlist.state.repeatCount}
               onClick={cycleRepeat}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${playlist.state.repeat === 'off' ? 'text-gray-400' : 'text-blue-600'}`}
-              title={
-                playlist.state.repeat === 'off'
-                  ? 'Repeat off'
-                  : playlist.state.repeat === 'all'
-                    ? 'Repeat all'
-                    : playlist.state.repeat === 'one'
-                      ? 'Repeat one'
-                      : `Repeat ${playlist.state.repeatCount}x`
-              }
-            >
-              {playlist.state.repeat === 'one' ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 0.5 17.5 2.5 15 4.5" />
-                  <path d="M4 8V6a3.5 3.5 0 0 1 3.5-3.5H17" />
-                  <polyline points="9 19.5 6.5 21.5 9 23.5" />
-                  <path d="M20 16v2a3.5 3.5 0 0 1-3.5 3.5H7" />
-                  <text x="12" y="16" fontSize="10" fill="currentColor" stroke="none" textAnchor="middle">
-                    {'\u221E'}
-                  </text>
-                </svg>
-              ) : playlist.state.repeat === 'Nx' ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 0.5 17.5 2.5 15 4.5" />
-                  <path d="M4 8V6a3.5 3.5 0 0 1 3.5-3.5H17" />
-                  <polyline points="9 19.5 6.5 21.5 9 23.5" />
-                  <path d="M20 16v2a3.5 3.5 0 0 1-3.5 3.5H7" />
-                  <text
-                    x="12"
-                    y="15.5"
-                    fontSize={playlist.state.repeatCount >= 10 ? '7' : '9'}
-                    fill="currentColor"
-                    stroke="none"
-                    textAnchor="middle"
-                    fontWeight="bold"
-                  >
-                    {playlist.state.repeatCount}
-                  </text>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="17 1 21 5 17 9" />
-                  <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                  <polyline points="7 23 3 19 7 15" />
-                  <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                </svg>
-              )}
-            </button>
+            />
           </div>
 
           {/* Center: player controls */}
