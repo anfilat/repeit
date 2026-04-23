@@ -13,6 +13,7 @@ import type { Track, RepeatMode } from '../types';
 export function App() {
   const playlist = usePlaylist();
   const audio = useAudioEngine();
+  const userPausedRef = useRef(false);
   const loadingRef = useRef(false);
   const loadIdRef = useRef(0);
   const initialMountRef = useRef(true);
@@ -62,7 +63,7 @@ export function App() {
           }
         }
 
-        if (autoPlay) {
+        if (autoPlay && !userPausedRef.current) {
           audio.play();
         }
       } catch (err) {
@@ -78,6 +79,7 @@ export function App() {
 
   // Handle track end: advance to next track
   const handleTrackEnd = useCallback(() => {
+    if (userPausedRef.current) return;
     const nextTrack = playlist.autoAdvance();
     if (nextTrack) {
       loadAndPlay(nextTrack, true);
@@ -148,12 +150,14 @@ export function App() {
 
   const handlePlayPause = useCallback(() => {
     if (audio.audioState.isPlaying) {
+      userPausedRef.current = true;
       audio.pause();
       playlist.savePlaybackState({
         currentIndex: playlist.state.currentIndex,
         position: audio.audioState.currentTime,
       });
     } else if (playlist.currentTrack) {
+      userPausedRef.current = false;
       if (audio.audioState.duration === 0) {
         loadAndPlay(playlist.currentTrack, true);
       } else {
@@ -186,6 +190,7 @@ export function App() {
 
   const handleSelectTrack = useCallback(
     (index: number) => {
+      userPausedRef.current = false;
       playlist.setCurrentIndex(index);
       const track = playlist.state.tracks[index];
       if (track) {
@@ -249,8 +254,14 @@ export function App() {
     isPlaying: audio.audioState.isPlaying,
     duration: audio.audioState.duration,
     currentTime: audio.audioState.currentTime,
-    onPlay: () => audio.play(),
-    onPause: () => audio.pause(),
+    onPlay: () => {
+      userPausedRef.current = false;
+      audio.play();
+    },
+    onPause: () => {
+      userPausedRef.current = true;
+      audio.pause();
+    },
     onNext: handleNext,
     onPrevious: handlePrev,
     onSeek: handleSeek,

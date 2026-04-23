@@ -36,7 +36,12 @@ export class AudioEngine {
   }
 
   async play(): Promise<void> {
-    await this.audio.play();
+    try {
+      await this.audio.play();
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      throw err;
+    }
   }
 
   pause(): void {

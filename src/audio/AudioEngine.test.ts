@@ -123,6 +123,16 @@ describe('AudioEngine', () => {
     expect(engine.currentTime).toBe(0);
   });
 
+  it('swallows AbortError when play is interrupted by pause', async () => {
+    mockAudio.play.mockRejectedValueOnce(new DOMException('aborted', 'AbortError'));
+    await expect(engine.play()).resolves.toBeUndefined();
+  });
+
+  it('re-throws non-AbortError from play', async () => {
+    mockAudio.play.mockRejectedValueOnce(new Error('other'));
+    await expect(engine.play()).rejects.toThrow('other');
+  });
+
   it('calls onTrackEnd callback when playback finishes', () => {
     const onEnd = vi.fn();
     engine.onTrackEnd = onEnd;
