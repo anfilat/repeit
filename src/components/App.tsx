@@ -248,6 +248,23 @@ export function App() {
     playlist.sortTracks();
   }, [playlist]);
 
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === ' ') {
+        e.preventDefault();
+        handlePlayPause();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrev();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePlayPause, handleNext, handlePrev]);
+
   // Media Session API: lock screen / notification controls
   useMediaSession({
     track: playlist.currentTrack ?? null,
