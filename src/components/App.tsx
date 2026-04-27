@@ -248,6 +248,10 @@ export function App() {
     playlist.sortTracks();
   }, [playlist]);
 
+  const handleShuffle = useCallback(() => {
+    playlist.shuffleTracks();
+  }, [playlist]);
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -400,6 +404,7 @@ export function App() {
               onAddFiles={handleSelectFiles}
               onAddFolder={handleSelectFolder}
               onSort={handleSort}
+              onShuffle={handleShuffle}
               onClear={() => {
                 if (confirm('Clear all tracks?')) handleClearPlaylist();
               }}

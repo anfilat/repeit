@@ -237,4 +237,43 @@ describe('PlaylistManager', () => {
       expect(pm.state.currentIndex).toBe(0);
     });
   });
+
+  describe('shuffle', () => {
+    it('randomizes track order', () => {
+      const pm = new PlaylistManager();
+      // Use enough tracks that random shuffle is very unlikely to produce original order
+      const manyTracks = Array.from({ length: 20 }, (_, i) => createTrack(`t${i}`));
+      pm.setTracks(manyTracks);
+      const originalOrder = pm.state.tracks.map(t => t.id);
+      pm.shuffle();
+      const shuffledOrder = pm.state.tracks.map(t => t.id);
+      // Same tracks, different order (extremely unlikely to be identical with 20 tracks)
+      expect(shuffledOrder.slice().sort()).toEqual(originalOrder.slice().sort());
+      expect(shuffledOrder).not.toEqual(originalOrder);
+    });
+
+    it('preserves current track after shuffle', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks(tracks);
+      pm.setCurrentIndex(1);
+      const currentName = pm.currentTrack!.name;
+      pm.shuffle();
+      expect(pm.currentTrack!.name).toBe(currentName);
+    });
+
+    it('does not crash on empty playlist', () => {
+      const pm = new PlaylistManager();
+      pm.shuffle();
+      expect(pm.state.tracks).toEqual([]);
+      expect(pm.state.currentIndex).toBe(-1);
+    });
+
+    it('does not crash on single track', () => {
+      const pm = new PlaylistManager();
+      pm.setTracks([createTrackNamed('Solo')]);
+      pm.shuffle();
+      expect(pm.state.tracks.map(t => t.name)).toEqual(['Solo']);
+      expect(pm.state.currentIndex).toBe(0);
+    });
+  });
 });

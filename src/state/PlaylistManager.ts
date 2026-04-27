@@ -106,4 +106,18 @@ export class PlaylistManager {
       this.state.currentIndex = tracks.findIndex(t => t.id === currentId);
     }
   }
+
+  shuffle(): void {
+    const { tracks, currentIndex } = this.state;
+    if (tracks.length <= 1) return;
+    const currentId = currentIndex >= 0 ? tracks[currentIndex].id : undefined;
+    // Fisher-Yates shuffle
+    for (let i = tracks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tracks[i], tracks[j]] = [tracks[j], tracks[i]];
+    }
+    if (currentId !== undefined) {
+      this.state.currentIndex = tracks.findIndex(t => t.id === currentId);
+    }
+  }
 }

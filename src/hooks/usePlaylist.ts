@@ -116,6 +116,11 @@ export function usePlaylist() {
     [sync]
   );
 
+  const shuffleTracks = useCallback(() => {
+    managerRef.current.shuffle();
+    sync();
+  }, [sync]);
+
   const sortTracks = useCallback(() => {
     managerRef.current.sort((a, b) => naturalCompare(a.name, b.name));
     sync();
@@ -243,6 +248,7 @@ export function usePlaylist() {
     clearPlaylist,
     removeTrack,
     reorder,
+    shuffleTracks,
     sortTracks,
     next,
     prev,

@@ -4,6 +4,7 @@ interface PlaylistMenuProps {
   onAddFiles: () => void;
   onAddFolder: () => void;
   onSort: () => void;
+  onShuffle: () => void;
   onClear: () => void;
   onSetRepeatCount: () => void;
   hasTracks: boolean;
@@ -13,6 +14,7 @@ export function PlaylistMenu({
   onAddFiles,
   onAddFolder,
   onSort,
+  onShuffle,
   onClear,
   onSetRepeatCount,
   hasTracks,
@@ -69,6 +71,30 @@ export function PlaylistMenu({
             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             <span className="inline-block w-5 text-center">{'\u2195'}</span> Sort
+          </button>
+          <button
+            onClick={() => handleAction(onShuffle)}
+            disabled={!hasTracks}
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+          >
+            <span className="inline-block w-5 text-center">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2 4h3l3 4-3 4H2" />
+                <path d="M14 4h-3L8 8l3 4h3" />
+                <path d="M12 2l2 2-2 2" />
+                <path d="M12 10l2 2-2 2" />
+              </svg>
+            </span>{' '}
+            Shuffle
           </button>
           <button
             onClick={() => handleAction(onClear)}
