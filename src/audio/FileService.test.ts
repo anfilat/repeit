@@ -40,6 +40,14 @@ describe('FileService', () => {
     expect(result.map(h => h.name)).toEqual(['song.mp3', 'song.wav']);
   });
 
+  it('skips .trashed- files in filterAudioFiles', () => {
+    const mp3 = createMockFileHandle('song.mp3');
+    const trashed = createMockFileHandle('.trashed-song.mp3');
+    const result = fileService.filterAudioFiles([mp3, trashed]);
+    expect(result).toHaveLength(1);
+    expect(result.map(h => h.name)).toEqual(['song.mp3']);
+  });
+
   it('scans directory for audio files sorted by name', async () => {
     const mp3 = createMockFileHandle('track10.mp3');
     const wav = createMockFileHandle('track2.wav');
@@ -56,5 +64,19 @@ describe('FileService', () => {
     const result = await fileService.scanDirectory(dirHandle);
     expect(result).toHaveLength(3);
     expect(result.map(h => h.name)).toEqual(['track1.mp3', 'track2.wav', 'track10.mp3']);
+  });
+
+  it('skips .trashed- files when scanning directory', async () => {
+    const mp3 = createMockFileHandle('song.mp3');
+    const trashed = createMockFileHandle('.trashed-song.mp3');
+    const dirHandle = createMockDirectoryHandle(
+      new Map([
+        ['song.mp3', mp3],
+        ['.trashed-song.mp3', trashed],
+      ])
+    );
+    const result = await fileService.scanDirectory(dirHandle);
+    expect(result).toHaveLength(1);
+    expect(result.map(h => h.name)).toEqual(['song.mp3']);
   });
 });

@@ -1,10 +1,13 @@
 import { naturalCompare } from '../utils/naturalSort';
 
 const AUDIO_EXTENSIONS = ['.mp3', '.wav'];
+const TRASHED = '.trashed-';
 
 export class FileService {
   filterAudioFiles(handles: FileSystemFileHandle[]): FileSystemFileHandle[] {
-    return handles.filter(h => AUDIO_EXTENSIONS.some(ext => h.name.toLowerCase().endsWith(ext)));
+    return handles.filter(
+      h => !h.name.startsWith(TRASHED) && AUDIO_EXTENSIONS.some(ext => h.name.toLowerCase().endsWith(ext))
+    );
   }
 
   async scanDirectory(dirHandle: FileSystemDirectoryHandle): Promise<FileSystemFileHandle[]> {
@@ -12,7 +15,10 @@ export class FileService {
     for await (const entry of dirHandle.values()) {
       if (entry.kind === 'file') {
         const fileHandle = entry as FileSystemFileHandle;
-        if (AUDIO_EXTENSIONS.some(ext => fileHandle.name.toLowerCase().endsWith(ext))) {
+        if (
+          !fileHandle.name.startsWith(TRASHED) &&
+          AUDIO_EXTENSIONS.some(ext => fileHandle.name.toLowerCase().endsWith(ext))
+        ) {
           audioHandles.push(fileHandle);
         }
       }
