@@ -11,6 +11,8 @@ vi.stubGlobal(
       // Fire synchronously so tests don't hang
       if (event === 'loadedmetadata') handler();
     }
+    removeEventListener() {}
+    load() {}
   }
 );
 

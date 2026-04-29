@@ -24,9 +24,18 @@ export class AudioEngine {
   }
 
   async waitForReady(): Promise<void> {
+    if (this.audio.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return;
     await new Promise<void>((resolve, reject) => {
-      this.audio.oncanplay = () => resolve();
-      this.audio.onerror = () => reject(new Error('Failed to load audio'));
+      const onCanPlay = () => {
+        this.audio.removeEventListener('error', onError);
+        resolve();
+      };
+      const onError = () => {
+        this.audio.removeEventListener('canplay', onCanPlay);
+        reject(new Error('Failed to load audio'));
+      };
+      this.audio.addEventListener('canplay', onCanPlay);
+      this.audio.addEventListener('error', onError);
     });
   }
 

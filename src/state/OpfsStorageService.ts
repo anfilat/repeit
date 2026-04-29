@@ -16,12 +16,23 @@ async function computeHash(data: ArrayBuffer): Promise<string> {
 function getAudioDurationFromUrl(url: string): Promise<number> {
   return new Promise(resolve => {
     const audio = new Audio();
-    audio.addEventListener('loadedmetadata', () => {
-      resolve(audio.duration || 0);
-    });
-    audio.addEventListener('error', () => {
+    const cleanup = () => {
+      audio.removeEventListener('loadedmetadata', onLoaded);
+      audio.removeEventListener('error', onError);
+      audio.src = '';
+      audio.load();
+    };
+    const onLoaded = () => {
+      const duration = audio.duration || 0;
+      cleanup();
+      resolve(duration);
+    };
+    const onError = () => {
+      cleanup();
       resolve(0);
-    });
+    };
+    audio.addEventListener('loadedmetadata', onLoaded);
+    audio.addEventListener('error', onError);
     audio.src = url;
   });
 }

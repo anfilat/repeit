@@ -6,8 +6,7 @@ let mockAudio: {
   currentTime: number;
   duration: number;
   src: string;
-  oncanplay: (() => void) | null;
-  onerror: (() => void) | null;
+  readyState: number;
   play: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
   load: ReturnType<typeof vi.fn>;
@@ -24,8 +23,7 @@ vi.stubGlobal(
     currentTime = 0;
     duration = NaN;
     src = '';
-    oncanplay: (() => void) | null = null;
-    onerror: (() => void) | null = null;
+    readyState = 0;
     play = vi.fn(async () => {
       this.paused = false;
     });
@@ -40,7 +38,9 @@ vi.stubGlobal(
       mockListeners[event] = mockListeners[event] ?? [];
       mockListeners[event].push(handler);
     });
-    removeEventListener = vi.fn();
+    removeEventListener = vi.fn((event: string, handler: () => void) => {
+      mockListeners[event] = (mockListeners[event] ?? []).filter(h => h !== handler);
+    });
     constructor() {
       mockAudio = this as unknown as typeof mockAudio;
     }
@@ -68,7 +68,7 @@ describe('AudioEngine', () => {
   it('loads a URL and waits for canplay', async () => {
     const loadPromise = engine.loadUrl('blob:test');
     mockAudio.duration = 180;
-    mockAudio.oncanplay!();
+    mockListeners['canplay'][0]();
     await loadPromise;
     expect(mockAudio.src).toBe('blob:test');
     expect(engine.duration).toBe(180);
@@ -78,7 +78,7 @@ describe('AudioEngine', () => {
   it('plays after loading', async () => {
     mockAudio.duration = 120;
     const loadPromise = engine.loadUrl('blob:test');
-    mockAudio.oncanplay!();
+    mockListeners['canplay'][0]();
     await loadPromise;
 
     await engine.play();
@@ -89,7 +89,7 @@ describe('AudioEngine', () => {
   it('pauses and reports correct currentTime', async () => {
     mockAudio.duration = 120;
     const loadPromise = engine.loadUrl('blob:test');
-    mockAudio.oncanplay!();
+    mockListeners['canplay'][0]();
     await loadPromise;
 
     await engine.play();
@@ -102,7 +102,7 @@ describe('AudioEngine', () => {
   it('seeks to a target position', async () => {
     mockAudio.duration = 120;
     const loadPromise = engine.loadUrl('blob:test');
-    mockAudio.oncanplay!();
+    mockListeners['canplay'][0]();
     await loadPromise;
 
     await engine.play();
@@ -114,7 +114,7 @@ describe('AudioEngine', () => {
   it('stops playback completely', async () => {
     mockAudio.duration = 120;
     const loadPromise = engine.loadUrl('blob:test');
-    mockAudio.oncanplay!();
+    mockListeners['canplay'][0]();
     await loadPromise;
 
     await engine.play();

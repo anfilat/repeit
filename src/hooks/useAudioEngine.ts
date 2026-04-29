@@ -12,12 +12,17 @@ export function useAudioEngine() {
   });
 
   const tick = useCallback(() => {
-    const engine = engineRef.current;
-    setAudioState({
-      isPlaying: engine.isPlaying,
-      currentTime: engine.currentTime,
-      duration: engine.duration,
-    });
+    try {
+      const engine = engineRef.current;
+      setAudioState({
+        isPlaying: engine.isPlaying,
+        currentTime: engine.currentTime,
+        duration: engine.duration,
+      });
+    } catch {
+      cancelAnimationFrame(rafRef.current);
+      return;
+    }
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
@@ -30,10 +35,7 @@ export function useAudioEngine() {
     cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const pendingSeekRef = useRef<number | null>(null);
-
   const loadUrl = useCallback(async (url: string) => {
-    pendingSeekRef.current = null;
     await engineRef.current.loadUrl(url);
     setAudioState({
       isPlaying: false,
