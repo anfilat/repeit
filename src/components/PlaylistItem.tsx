@@ -3,6 +3,7 @@ import type { Track } from '../types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TrackMenu } from './TrackMenu';
+import { formatTime } from '../utils/formatTime';
 
 function useIsTouchDevice() {
   const [isTouch, setIsTouch] = useState(() => window.matchMedia('(pointer: coarse)').matches);
@@ -24,12 +25,6 @@ interface PlaylistItemProps {
   onMoveDown: () => void;
   isFirst: boolean;
   isLast: boolean;
-}
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 export function PlaylistItem({
@@ -90,7 +85,7 @@ export function PlaylistItem({
         </button>
       )}
       <span className="flex-1 truncate text-sm">{track.name}</span>
-      <span className="text-xs text-gray-500">{formatDuration(track.duration)}</span>
+      <span className="text-xs text-gray-500">{formatTime(track.duration)}</span>
       <TrackMenu
         onPlay={onSelect}
         onMoveUp={onMoveUp}

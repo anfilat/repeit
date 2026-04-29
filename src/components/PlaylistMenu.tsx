@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface PlaylistMenuProps {
   onAddFiles: () => void;
@@ -22,16 +23,7 @@ export function PlaylistMenu({
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [open]);
+  useClickOutside(menuRef, () => setOpen(false));
 
   const handleAction = (action: () => void) => {
     setOpen(false);
