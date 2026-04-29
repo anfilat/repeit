@@ -179,6 +179,8 @@ export function App() {
     const track = playlist.prev();
     if (track) {
       loadAndPlay(track, audio.audioState.isPlaying);
+    } else {
+      audio.stop();
     }
   }, [playlist, audio, loadAndPlay]);
 

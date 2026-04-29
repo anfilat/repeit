@@ -53,6 +53,37 @@ describe('PlaylistManager', () => {
     expect(pm.state.currentIndex).toBe(0);
   });
 
+  it('next resets playCount in Nx mode', () => {
+    const pm = new PlaylistManager();
+    pm.setTracks(tracks);
+    pm.setRepeatCount(5);
+    pm.setRepeat('Nx');
+    pm.autoAdvance(); // playCount = 1
+    pm.autoAdvance(); // playCount = 2
+    pm.next(); // should reset playCount to 0
+    // After next, the new track should get full N repeats
+    expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount = 1, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount = 2, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount = 3, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount = 4, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[2]); // playCount = 5, advance
+  });
+
+  it('prev resets playCount in Nx mode', () => {
+    const pm = new PlaylistManager();
+    pm.setTracks(tracks);
+    pm.setRepeatCount(3);
+    pm.setRepeat('Nx');
+    pm.next(); // index = 1
+    pm.autoAdvance(); // playCount = 1
+    pm.autoAdvance(); // playCount = 2
+    pm.prev(); // should reset playCount to 0, index = 0
+    // After prev, the new track should get full N repeats
+    expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount = 1, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount = 2, repeat
+    expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount = 3, advance
+  });
+
   it('next beyond last wraps to first', () => {
     const pm = new PlaylistManager();
     pm.setTracks(tracks);
@@ -164,7 +195,7 @@ describe('PlaylistManager', () => {
         expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount 1 again
       });
 
-      it('resets playCount on repeat mode change', () => {
+      it('resets playCount when autoAdvance runs in non-Nx mode', () => {
         const pm = new PlaylistManager();
         pm.setTracks(tracks);
         pm.setRepeatCount(3);
@@ -172,19 +203,24 @@ describe('PlaylistManager', () => {
 
         expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1
         pm.setRepeat('off');
+        pm.autoAdvance(); // non-Nx autoAdvance resets playCount, advances to track b
         pm.setRepeat('Nx');
-        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1 again
+        expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount 1 on track b
       });
 
-      it('resets playCount on repeatCount change', () => {
+      it('playCount carries over on repeatCount change', () => {
         const pm = new PlaylistManager();
         pm.setTracks(tracks);
         pm.setRepeatCount(3);
         pm.setRepeat('Nx');
 
         expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1
-        pm.setRepeatCount(5);
-        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 1 again
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 2
+        pm.setRepeatCount(5); // playCount is still 2
+        // playCount continues from 2, so only 3 more repeats before advancing
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 3
+        expect(pm.autoAdvance()).toEqual(tracks[0]); // playCount 4
+        expect(pm.autoAdvance()).toEqual(tracks[1]); // playCount 5, advance
       });
     });
   });

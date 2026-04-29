@@ -16,12 +16,10 @@ export class PlaylistManager {
 
   setRepeat(mode: RepeatMode): void {
     this.state.repeat = mode;
-    this.playCount = 0;
   }
 
   setRepeatCount(count: number): void {
     this.state.repeatCount = count;
-    this.playCount = 0;
   }
 
   setCurrentIndex(index: number): void {
@@ -34,6 +32,7 @@ export class PlaylistManager {
     if (tracks.length === 0) return null;
     const nextIndex = (this.state.currentIndex + 1) % tracks.length;
     this.state.currentIndex = nextIndex;
+    this.playCount = 0;
     return tracks[nextIndex];
   }
 
@@ -42,18 +41,28 @@ export class PlaylistManager {
     if (tracks.length === 0) return null;
     const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
     this.state.currentIndex = prevIndex;
+    this.playCount = 0;
     return tracks[prevIndex];
   }
 
   autoAdvance(): Track | null {
     const { tracks, currentIndex, repeat, repeatCount } = this.state;
-    if (tracks.length === 0) return null;
-    if (repeat === 'one') return tracks[currentIndex] ?? null;
+    if (tracks.length === 0) {
+      return null;
+    }
+
     if (repeat === 'Nx') {
       this.playCount++;
-      if (this.playCount < repeatCount) return tracks[currentIndex] ?? null;
-      this.playCount = 0;
+      if (this.playCount < repeatCount) {
+        return tracks[currentIndex] ?? null;
+      }
     }
+
+    this.playCount = 0;
+    if (repeat === 'one') {
+      return tracks[currentIndex] ?? null;
+    }
+
     const nextIndex = currentIndex + 1;
     if (nextIndex >= tracks.length) {
       if (repeat === 'all' || repeat === 'Nx') {
