@@ -53,7 +53,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
             }}
             className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-gray-100 transition-colors"
           >
-            {'\u25B6'} Воспроизвести
+            {'\u25B6'} Play
           </button>
           <button
             onClick={e => {
@@ -63,7 +63,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
             disabled={!canMoveUp}
             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
-            {'\u25B2'} Переместить вверх
+            {'\u25B2'} Move Up
           </button>
           <button
             onClick={e => {
@@ -73,7 +73,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
             disabled={!canMoveDown}
             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
-            {'\u25BC'} Переместить вниз
+            {'\u25BC'} Move Down
           </button>
           <button
             onClick={e => {
@@ -82,7 +82,7 @@ export function TrackMenu({ onPlay, onMoveUp, onMoveDown, onDelete, canMoveUp, c
             }}
             className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
           >
-            {'\uD83D\uDDD1'} Удалить
+            {'\uD83D\uDDD1'} Delete
           </button>
         </div>
       )}

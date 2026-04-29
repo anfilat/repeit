@@ -316,7 +316,7 @@ export function App() {
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 mx-4 min-w-[280px] shadow-lg">
             <p className="text-center mb-3 text-sm">
-              Копирование файлов {playlist.loadingState.current}/{playlist.loadingState.total}
+              Copying files {playlist.loadingState.current}/{playlist.loadingState.total}
             </p>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
@@ -334,8 +334,8 @@ export function App() {
       {missingFiles.length > 0 && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 mx-4 min-w-[280px] max-w-[400px] shadow-lg">
-            <h2 className="text-lg font-semibold mb-3">Файлы не найдены</h2>
-            <p className="text-sm text-gray-600 mb-3">Следующие файлы отсутствуют:</p>
+            <h2 className="text-lg font-semibold mb-3">Files not found</h2>
+            <p className="text-sm text-gray-600 mb-3">The following files are missing:</p>
             <ul className="text-sm text-gray-500 mb-4 max-h-40 overflow-y-auto">
               {missingFiles.map(id => (
                 <li key={id}>• {id}</li>
@@ -349,13 +349,13 @@ export function App() {
                 }}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
               >
-                Очистить плейлист
+                Clear Playlist
               </button>
               <button
                 onClick={() => setMissingFiles([])}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition-colors"
               >
-                ОК
+                OK
               </button>
             </div>
           </div>
